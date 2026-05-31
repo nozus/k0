@@ -53,7 +53,7 @@
   max-width: 440px;
   background: var(--bg-card);
   border: 1px solid var(--border);
-  border-radius: 0;
+  border-radius: var(--radius-2xl);
   padding: var(--space-2xl);
   position: relative;
 }
@@ -91,12 +91,12 @@
 
 .auth-tab {
   flex: 1;
-  padding: var(--space-sm) var(--space-md);
+  padding: var(--space-sm);
   font-size: var(--text-sm);
   font-weight: 600;
   color: var(--text-secondary);
   text-align: center;
-  border-radius: 0;
+  border-radius: var(--radius-sm);
   transition:
     color var(--transition-base),
     background var(--transition-base),
@@ -144,7 +144,7 @@
   color: var(--text-primary);
   background: var(--bg-input);
   border: 1px solid var(--border);
-  border-radius: 0;
+  border-radius: var(--radius-md);
   transition:
     border-color var(--transition-base),
     box-shadow var(--transition-base),
@@ -182,6 +182,38 @@
   margin-top: 2px;
 }
 
+/* ── Password Toggle ───────────────────────────────────────── */
+.password-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-input-wrapper input {
+  flex: 1;
+  padding-right: 40px; /* space for the eye icon */
+}
+
+.password-toggle {
+  position: absolute;
+  right: 12px;
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 16px;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.2s;
+  opacity: 0.6;
+}
+
+.password-toggle:hover {
+  opacity: 1;
+}
+
 /* ── Submit Button ─────────────────────────────────────────── */
 .auth-submit {
   width: 100%;
@@ -190,7 +222,7 @@
   color: #fff;
   background: var(--text-primary);
   border: none;
-  border-radius: 0;
+  border-radius: var(--radius-md);
   cursor: pointer;
   margin-top: var(--space-md);
   position: relative;

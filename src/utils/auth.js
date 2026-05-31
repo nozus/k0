@@ -33,59 +33,56 @@ export async function getCurrentProfile() {
  */
 export async function signUp({ email, password, username, displayName, avatarFile }) {
   // 1. Create auth user
-  const { data: authData, error: authError } = await supabase.auth.signUp({
-    email,
-    password,
-  });
-
-  if (authError) throw authError;
-  if (!authData.user) throw new Error('Signup failed — no user returned');
-
-  const userId = authData.user.id;
-
-  // 2. Upload avatar if provided
+export async function signUp({ username, password, displayName, avatarFile }) {
+  // 1. Upload avatar if exists
   let avatarUrl = null;
   if (avatarFile) {
     const fileExt = avatarFile.name.split('.').pop();
-    const fileName = `${userId}.${fileExt}`;
+    const fileName = `${Math.random()}.${fileExt}`;
+    const filePath = `${fileName}`;
 
     const { error: uploadError } = await supabase.storage
       .from('avatars')
-      .upload(fileName, avatarFile, { upsert: true });
+      .upload(filePath, avatarFile);
 
     if (uploadError) {
-      console.error('Avatar upload error:', uploadError);
-    } else {
-      const { data: urlData } = supabase.storage
-        .from('avatars')
-        .getPublicUrl(fileName);
-      avatarUrl = urlData.publicUrl;
+      throw new Error(`Avatar upload failed: ${uploadError.message}`);
     }
+
+    const { data } = supabase.storage.from('avatars').getPublicUrl(filePath);
+    avatarUrl = data.publicUrl;
   }
 
-  // 3. Create profile
-  const { error: profileError } = await supabase
-    .from('profiles')
-    .insert({
-      id: userId,
-      username: username.toLowerCase().replace(/[^a-z0-9_]/g, ''),
-      display_name: displayName,
-      avatar_url: avatarUrl,
-      karma_score: 0,
-      is_blocked: false,
-    });
+  // Generate a dummy email so Supabase auth works without actually requiring an email
+  const dummyEmail = `${username}@k0.local`;
 
-  if (profileError) throw profileError;
+  // 2. Sign up user
+  const { data: authData, error: authError } = await supabase.auth.signUp({
+    email: dummyEmail,
+    password,
+    options: {
+      data: {
+        username,
+        display_name: displayName,
+        avatar_url: avatarUrl,
+      },
+    },
+  });
 
+  if (authError) throw authError;
+
+  // Note: We use a trigger in Supabase to automatically create the profile row
+  // after the auth user is created.
   return authData;
 }
 
 /**
- * Sign in an existing user
+ * Sign in existing user
  */
-export async function signIn({ email, password }) {
+export async function signIn({ username, password }) {
+  const dummyEmail = `${username}@k0.local`;
   const { data, error } = await supabase.auth.signInWithPassword({
-    email,
+    email: dummyEmail,
     password,
   });
 

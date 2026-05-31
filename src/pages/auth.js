@@ -14,16 +14,32 @@ export async function renderAuthPage(app) {
             <p class="auth-tagline">speak your mind</p>
           </div>
 
+          <div class="auth-tabs">
+            <button class="auth-tab auth-tab--active" data-tab="login" id="login-tab">login</button>
+            <button class="auth-tab" data-tab="signup" id="signup-tab">create kard</button>
+          </div>
+
+          <!-- Login Form -->
+          <form class="auth-form" id="login-form">
+            <div class="form-group">
+              <label for="login-username">username</label>
+              <input type="text" id="login-username" placeholder="@handle" required autocomplete="username" />
+            </div>
+            <div class="form-group">
+              <label for="login-password">password</label>
+              <div class="password-input-wrapper">
+                <input type="password" id="login-password" placeholder="••••••••" required autocomplete="current-password" />
+                <button type="button" class="password-toggle" data-target="login-password">👁️</button>
+              </div>
+            </div>
+            <div class="form-error" id="login-error"></div>
+            <button type="submit" class="btn-primary auth-submit" id="login-btn">
+              <span>enter k0</span>
+            </button>
+          </form>
+
           <!-- Signup Form -->
-          <form class="auth-form" id="signup-form">
-            <div class="form-group">
-              <label for="signup-email">email</label>
-              <input type="email" id="signup-email" placeholder="you@example.com" required autocomplete="email" />
-            </div>
-            <div class="form-group">
-              <label for="signup-password">password</label>
-              <input type="password" id="signup-password" placeholder="min 6 characters" required minlength="6" autocomplete="new-password" />
-            </div>
+          <form class="auth-form auth-form--hidden" id="signup-form">
             <div class="form-row">
               <div class="form-group">
                 <label for="signup-username">username</label>
@@ -32,6 +48,13 @@ export async function renderAuthPage(app) {
               <div class="form-group">
                 <label for="signup-displayname">display name</label>
                 <input type="text" id="signup-displayname" placeholder="your name" required maxlength="30" />
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="signup-password">password</label>
+              <div class="password-input-wrapper">
+                <input type="password" id="signup-password" placeholder="min 6 characters" required minlength="6" autocomplete="new-password" />
+                <button type="button" class="password-toggle" data-target="signup-password">👁️</button>
               </div>
             </div>
             <div class="form-group">
@@ -53,7 +76,7 @@ export async function renderAuthPage(app) {
         </div>
 
         <!-- Live Kard Preview (signup only) -->
-        <div class="auth-preview" id="kard-preview-area">
+        <div class="auth-preview" id="kard-preview-area" style="display:none">
           <h3 class="auth-preview-title">your kard preview</h3>
           <div id="kard-preview-container">
             ${createKard({
@@ -68,6 +91,44 @@ export async function renderAuthPage(app) {
       </div>
     </div>
   `;
+
+  // Tab switching
+  const loginTab = document.getElementById('login-tab');
+  const signupTab = document.getElementById('signup-tab');
+  const loginForm = document.getElementById('login-form');
+  const signupForm = document.getElementById('signup-form');
+  const previewArea = document.getElementById('kard-preview-area');
+
+  loginTab.addEventListener('click', () => {
+    loginTab.classList.add('auth-tab--active');
+    signupTab.classList.remove('auth-tab--active');
+    loginForm.classList.remove('auth-form--hidden');
+    signupForm.classList.add('auth-form--hidden');
+    previewArea.style.display = 'none';
+  });
+
+  signupTab.addEventListener('click', () => {
+    signupTab.classList.add('auth-tab--active');
+    loginTab.classList.remove('auth-tab--active');
+    signupForm.classList.remove('auth-form--hidden');
+    loginForm.classList.add('auth-form--hidden');
+    previewArea.style.display = 'block';
+  });
+
+  // Password Toggles
+  document.querySelectorAll('.password-toggle').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const targetId = e.currentTarget.getAttribute('data-target');
+      const input = document.getElementById(targetId);
+      if (input.type === 'password') {
+        input.type = 'text';
+        btn.textContent = '🙈';
+      } else {
+        input.type = 'password';
+        btn.textContent = '👁️';
+      }
+    });
+  });
 
   // Avatar upload
   const avatarUploadArea = document.getElementById('avatar-upload-area');
@@ -110,8 +171,30 @@ export async function renderAuthPage(app) {
   usernameInput.addEventListener('input', updateKardPreview);
   displayNameInput.addEventListener('input', updateKardPreview);
 
+  // Login handler
+  loginForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const loginError = document.getElementById('login-error');
+    const loginBtn = document.getElementById('login-btn');
+    loginError.textContent = '';
+    loginBtn.disabled = true;
+    loginBtn.innerHTML = '<span class="spinner"></span>';
+
+    try {
+      await signIn({
+        username: document.getElementById('login-username').value,
+        password: document.getElementById('login-password').value,
+      });
+      navigateTo('/feed');
+    } catch (err) {
+      loginError.textContent = err.message;
+    } finally {
+      loginBtn.disabled = false;
+      loginBtn.innerHTML = '<span>enter k0</span>';
+    }
+  });
+
   // Signup handler
-  const signupForm = document.getElementById('signup-form');
   signupForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const signupError = document.getElementById('signup-error');
@@ -122,9 +205,8 @@ export async function renderAuthPage(app) {
 
     try {
       await signUp({
-        email: document.getElementById('signup-email').value,
-        password: document.getElementById('signup-password').value,
         username: document.getElementById('signup-username').value,
+        password: document.getElementById('signup-password').value,
         displayName: document.getElementById('signup-displayname').value,
         avatarFile: selectedAvatarFile,
       });
