@@ -1,5 +1,6 @@
-import { signUp, signIn } from '../utils/auth.js';
+import { signUp } from '../utils/auth.js';
 import { navigateTo } from '../router.js';
+import { createKard } from '../components/kard.js';
 
 export async function renderAuthPage(app) {
   app.innerHTML = `
@@ -11,43 +12,11 @@ export async function renderAuthPage(app) {
           <p class="auth-tagline">speak your mind.</p>
         </div>
 
-        <!-- Right: Forms -->
+        <!-- Right: Forms & Preview -->
         <div class="auth-form-section">
-          <!-- Segmented Control -->
-          <div class="auth-segmented">
-            <input type="radio" name="auth-mode" id="mode-login" checked>
-            <label for="mode-login" class="auth-segment-label">login</label>
-            <input type="radio" name="auth-mode" id="mode-signup">
-            <label for="mode-signup" class="auth-segment-label">create kard</label>
-          </div>
-
-          <!-- Login Form -->
-          <form class="auth-form" id="login-form">
-            <input
-              type="text"
-              class="input-control"
-              id="login-username"
-              placeholder="username"
-              required
-              autocomplete="username"
-            />
-            <div class="password-wrapper">
-              <input
-                type="password"
-                class="input-control"
-                id="login-password"
-                placeholder="password"
-                required
-                autocomplete="current-password"
-              />
-              <button type="button" class="show-pass-btn" data-target="login-password">show</button>
-            </div>
-            <div class="auth-error" id="login-error"></div>
-            <button type="submit" class="submit-btn" id="login-btn">enter k0</button>
-          </form>
-
           <!-- Signup Form -->
-          <form class="auth-form auth-form--hidden" id="signup-form">
+          <form class="auth-form" id="signup-form">
+            <h2>create kard.</h2>
             <input
               type="text"
               class="input-control"
@@ -77,31 +46,36 @@ export async function renderAuthPage(app) {
               />
               <button type="button" class="show-pass-btn" data-target="signup-password">show</button>
             </div>
+            
+            <!-- Hidden avatar input & visible trigger button -->
+            <input type="file" id="signup-avatar" accept="image/*" style="display:none;" />
+            <button type="button" class="btn-ghost upload-avatar-btn" id="upload-avatar-btn">add profile picture</button>
+            
             <div class="auth-error" id="signup-error"></div>
             <button type="submit" class="submit-btn" id="signup-btn">create my kard</button>
           </form>
+
+          <!-- Live Kard Preview -->
+          <div class="auth-preview" id="kard-preview-area">
+            <h3 class="auth-preview-title">preview.</h3>
+            <div id="kard-preview-container">
+              ${createKard({
+                username: 'username',
+                display_name: 'display name',
+                avatar_url: null,
+                karma_score: 0,
+                created_at: new Date().toISOString(),
+              }, 'normal')}
+            </div>
+          </div>
         </div>
       </div>
     </div>
   `;
 
-  // Segmented control - toggle forms
-  const modeLogin = document.getElementById('mode-login');
-  const modeSignup = document.getElementById('mode-signup');
-  const loginForm = document.getElementById('login-form');
   const signupForm = document.getElementById('signup-form');
-
-  modeLogin.addEventListener('change', () => {
-    loginForm.classList.remove('auth-form--hidden');
-    signupForm.classList.add('auth-form--hidden');
-  });
-
-  modeSignup.addEventListener('change', () => {
-    signupForm.classList.remove('auth-form--hidden');
-    loginForm.classList.add('auth-form--hidden');
-  });
-
-  // Password show/hide toggles
+  
+  // Password show/hide
   document.querySelectorAll('.show-pass-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       const targetId = btn.getAttribute('data-target');
@@ -116,30 +90,37 @@ export async function renderAuthPage(app) {
     });
   });
 
-  // Login handler
-  loginForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const loginError = document.getElementById('login-error');
-    const loginBtn = document.getElementById('login-btn');
-    loginError.textContent = '';
-    loginError.classList.remove('visible');
-    loginBtn.disabled = true;
-    loginBtn.innerHTML = '<span class="spinner"></span>';
+  // Avatar upload (no preview)
+  const avatarInput = document.getElementById('signup-avatar');
+  const uploadBtn = document.getElementById('upload-avatar-btn');
+  let selectedAvatarFile = null;
 
-    try {
-      await signIn({
-        username: document.getElementById('login-username').value.trim(),
-        password: document.getElementById('login-password').value,
-      });
-      navigateTo('/feed');
-    } catch (err) {
-      loginError.textContent = err.message;
-      loginError.classList.add('visible');
-    } finally {
-      loginBtn.disabled = false;
-      loginBtn.innerHTML = 'enter k0';
+  uploadBtn.addEventListener('click', () => avatarInput.click());
+  avatarInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      selectedAvatarFile = file;
+      uploadBtn.textContent = 'picture added ✓';
     }
   });
+
+  // Live preview update
+  const usernameInput = document.getElementById('signup-username');
+  const displayNameInput = document.getElementById('signup-displayname');
+  const previewContainer = document.getElementById('kard-preview-container');
+
+  function updateKardPreview() {
+    previewContainer.innerHTML = createKard({
+      username: usernameInput.value || 'username',
+      display_name: displayNameInput.value || 'display name',
+      avatar_url: null, // No visual preview of avatar per request
+      karma_score: 0,
+      created_at: new Date().toISOString(),
+    }, 'normal');
+  }
+
+  usernameInput.addEventListener('input', updateKardPreview);
+  displayNameInput.addEventListener('input', updateKardPreview);
 
   // Signup handler
   signupForm.addEventListener('submit', async (e) => {
@@ -156,7 +137,7 @@ export async function renderAuthPage(app) {
         username: document.getElementById('signup-username').value.trim(),
         password: document.getElementById('signup-password').value,
         displayName: document.getElementById('signup-displayname').value.trim(),
-        avatarFile: null,
+        avatarFile: selectedAvatarFile,
       });
       navigateTo('/feed');
     } catch (err) {

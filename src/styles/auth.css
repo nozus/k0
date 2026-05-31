@@ -53,41 +53,9 @@
 .auth-form-section {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 2.5rem;
   width: 100%;
   max-width: 400px;
-}
-
-/* ── Segmented Control (Login/Signup toggle) ────────────────── */
-.auth-segmented {
-  display: flex;
-  background: var(--border);
-  border-radius: var(--radius);
-  padding: 4px;
-  gap: 4px;
-}
-
-.auth-segmented input[type="radio"] {
-  display: none;
-}
-
-.auth-segment-label {
-  flex: 1;
-  text-align: center;
-  padding: 0.8rem;
-  border-radius: 8px;
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: var(--text-muted);
-  cursor: pointer;
-  transition: background 0.2s, color 0.2s, box-shadow 0.2s;
-  user-select: none;
-}
-
-.auth-segmented input[type="radio"]:checked + .auth-segment-label {
-  background: var(--bg-alt);
-  color: var(--text-dark);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 /* ── Auth Forms ────────────────────────────────────────────── */
@@ -95,10 +63,6 @@
   display: flex;
   flex-direction: column;
   gap: 1rem;
-}
-
-.auth-form--hidden {
-  display: none;
 }
 
 .auth-form h2 {
@@ -140,6 +104,23 @@
   color: var(--text-dark);
 }
 
+/* ── Avatar Upload ─────────────────────────────────────────── */
+.upload-avatar-btn {
+  text-align: left;
+  padding: 0;
+  color: var(--text-muted);
+  font-weight: 600;
+  font-size: 1.1rem;
+  cursor: pointer;
+  background: none;
+  border: none;
+  transition: color 0.2s;
+}
+
+.upload-avatar-btn:hover {
+  color: var(--text-dark);
+}
+
 /* ── Error Message ─────────────────────────────────────────── */
 .auth-error {
   font-size: 1rem;
@@ -152,22 +133,17 @@
   display: block;
 }
 
-/* ── Toggle Link ───────────────────────────────────────────── */
-.auth-toggle {
-  font-size: 1rem;
-  font-weight: 600;
+/* ── Kard Preview ──────────────────────────────────────────── */
+.auth-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.auth-preview-title {
+  font-size: 1.5rem;
   color: var(--text-muted);
-  margin-top: 0.5rem;
-}
-
-.auth-toggle a {
-  color: var(--text-dark);
-  cursor: pointer;
-  transition: opacity 0.2s;
-}
-
-.auth-toggle a:hover {
-  opacity: 0.7;
+  font-weight: 600;
 }
 
 /* ── Responsive ────────────────────────────────────────────── */
@@ -196,6 +172,10 @@
   .submit-btn,
   .password-wrapper {
     max-width: 100%;
+  }
+
+  .upload-avatar-btn {
+    text-align: center;
   }
 }
 
