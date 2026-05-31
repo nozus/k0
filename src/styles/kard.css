@@ -1,489 +1,311 @@
-/* ============================================================
-   k0 — Kard Component Styles
-   Credit card-shaped profile component with holographic effects
-   ============================================================ */
+/* ------------------------------------------------------------------ */
+/*  Kard (Credit Card Profile) Component                              */
+/* ------------------------------------------------------------------ */
 
-/* ── Kard Container ────────────────────────────────────────── */
 .kard {
-  aspect-ratio: 85.6 / 53.98;
+  /* Standard credit card aspect ratio (85.6mm / 53.98mm) */
+  aspect-ratio: 1.5857;
   width: 100%;
-  max-width: 420px;
-  perspective: 1200px;
-  cursor: pointer;
-  user-select: none;
-  -webkit-tap-highlight-color: transparent;
-}
-
-/* ── Kard Inner — 3D Transform Target ──────────────────────── */
-.kard-inner {
+  max-width: 340px;
+  border-radius: 16px;
   position: relative;
-  width: 100%;
-  height: 100%;
-  border-radius: var(--radius-lg);
   overflow: hidden;
+  box-shadow: var(--shadow-lg), 0 20px 40px rgba(0, 0, 0, 0.4);
+  background: #111; /* Fallback */
+  color: white;
   transform-style: preserve-3d;
-  transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
   will-change: transform;
-  box-shadow:
-    0 8px 32px rgba(0, 0, 0, 0.4),
-    0 2px 8px rgba(0, 0, 0, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-/* 3D Hover Tilt */
-.kard:hover .kard-inner {
-  transform: perspective(800px) rotateY(4deg) rotateX(-3deg) scale(1.02);
-  box-shadow:
-    0 16px 48px rgba(0, 0, 0, 0.5),
-    0 4px 16px rgba(139, 92, 246, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+/* Size Variants */
+.kard-large {
+  max-width: 420px;
+  border-radius: 20px;
 }
 
-/* ── Kard Front Face ───────────────────────────────────────── */
-.kard-front {
+.kard-mini {
+  max-width: 240px;
+  border-radius: 12px;
+}
+
+/* ------------------------------------------------------------------ */
+/*  Background & Shimmer                                              */
+/* ------------------------------------------------------------------ */
+
+.kard::before {
+  content: '';
   position: absolute;
   inset: 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  padding: clamp(16px, 5%, 28px);
-  background:
-    linear-gradient(
-      135deg,
-      #1a1a2e 0%,
-      #12121a 40%,
-      #1a1a2e 60%,
-      #0a0a0f 100%
-    );
-  backface-visibility: hidden;
+  background: var(--gradient-holographic);
+  background-size: 200% 200%;
+  opacity: 0.15;
+  mix-blend-mode: overlay;
   z-index: 1;
 }
 
-/* Holographic gradient overlay */
-.kard-front::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    135deg,
-    rgba(139, 92, 246, 0.12) 0%,
-    rgba(6, 182, 212, 0.08) 25%,
-    rgba(236, 72, 153, 0.10) 50%,
-    rgba(139, 92, 246, 0.08) 75%,
-    rgba(6, 182, 212, 0.12) 100%
-  );
-  mix-blend-mode: screen;
-  z-index: 0;
-  transition: opacity var(--transition-base);
-}
-
-.kard:hover .kard-front::before {
-  opacity: 1.3;
-}
-
-/* Subtle pattern overlay for texture */
-.kard-front::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background:
-    repeating-linear-gradient(
-      0deg,
-      transparent,
-      transparent 2px,
-      rgba(255, 255, 255, 0.008) 2px,
-      rgba(255, 255, 255, 0.008) 4px
-    );
-  pointer-events: none;
-  z-index: 0;
-}
-
-/* ── Shimmer Overlay ───────────────────────────────────────── */
 .kard-shimmer {
   position: absolute;
-  inset: 0;
-  z-index: 5;
-  pointer-events: none;
-  overflow: hidden;
-  border-radius: inherit;
-}
-
-.kard-shimmer::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -150%;
-  width: 80%;
-  height: 100%;
+  inset: -100%;
   background: linear-gradient(
-    105deg,
+    135deg,
     transparent 20%,
-    rgba(255, 255, 255, 0.03) 30%,
-    rgba(255, 255, 255, 0.08) 45%,
-    rgba(255, 255, 255, 0.12) 50%,
-    rgba(255, 255, 255, 0.08) 55%,
-    rgba(255, 255, 255, 0.03) 70%,
+    rgba(255, 255, 255, 0.1) 40%,
+    rgba(255, 255, 255, 0.3) 50%,
+    rgba(255, 255, 255, 0.1) 60%,
     transparent 80%
   );
-  transform: skewX(-20deg);
-  animation: kardShimmerSweep 6s ease-in-out infinite;
-}
-
-@keyframes kardShimmerSweep {
-  0%, 100% {
-    left: -150%;
-    opacity: 0;
-  }
-  10% {
-    opacity: 1;
-  }
-  40% {
-    left: 150%;
-    opacity: 1;
-  }
-  50% {
-    left: 150%;
-    opacity: 0;
-  }
-}
-
-/* ── Kard Top Row ──────────────────────────────────────────── */
-.kard-top {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  position: relative;
   z-index: 2;
+  pointer-events: none;
+  animation: shimmerSweep 6s infinite linear;
+  mix-blend-mode: color-dodge;
 }
 
-/* ── Chip / Avatar ─────────────────────────────────────────── */
+@keyframes shimmerSweep {
+  0% { transform: translateX(-50%) translateY(-50%) rotate(0deg); }
+  100% { transform: translateX(50%) translateY(50%) rotate(360deg); }
+}
+
+/* ------------------------------------------------------------------ */
+/*  Layout Elements                                                   */
+/* ------------------------------------------------------------------ */
+
+.kard-top {
+  position: absolute;
+  top: 10%;
+  left: 8%;
+  right: 8%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 3;
+}
+
 .kard-chip {
-  width: clamp(36px, 12%, 52px);
-  height: clamp(36px, 12%, 52px);
-  border-radius: var(--radius-sm);
+  width: 14%;
+  aspect-ratio: 1.2;
+  background: linear-gradient(135deg, #ddd, #999);
+  border-radius: 6px;
   overflow: hidden;
-  position: relative;
-  background: linear-gradient(
-    145deg,
-    rgba(255, 255, 255, 0.12),
-    rgba(255, 255, 255, 0.04)
-  );
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  box-shadow:
-    0 2px 8px rgba(0, 0, 0, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  box-shadow: inset 0 1px 2px rgba(255,255,255,0.5), inset 0 -1px 2px rgba(0,0,0,0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.kard-chip img {
+.kard-chip-img {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-/* Chip metallic glint lines */
-.kard-chip::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background:
-    linear-gradient(
-      to right,
-      transparent 30%,
-      rgba(255, 255, 255, 0.06) 32%,
-      rgba(255, 255, 255, 0.06) 34%,
-      transparent 36%,
-      transparent 64%,
-      rgba(255, 255, 255, 0.06) 66%,
-      rgba(255, 255, 255, 0.06) 68%,
-      transparent 70%
-    ),
-    linear-gradient(
-      to bottom,
-      transparent 30%,
-      rgba(255, 255, 255, 0.06) 32%,
-      rgba(255, 255, 255, 0.06) 34%,
-      transparent 36%,
-      transparent 64%,
-      rgba(255, 255, 255, 0.06) 66%,
-      rgba(255, 255, 255, 0.06) 68%,
-      transparent 70%
-    );
-  pointer-events: none;
+.kard-chip-initials {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: white;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
 }
 
-/* ── Logo / Brand Mark ─────────────────────────────────────── */
+.kard-mini .kard-chip-initials {
+  font-size: 0.8rem;
+}
+
 .kard-logo {
-  font-family: var(--font-mono);
-  font-size: clamp(14px, 4%, 20px);
-  font-weight: 700;
+  font-family: var(--font-sans);
+  font-weight: 800;
+  font-size: 1.5rem;
+  font-style: italic;
   background: var(--gradient-primary);
   -webkit-background-clip: text;
-  background-clip: text;
   -webkit-text-fill-color: transparent;
-  letter-spacing: -0.04em;
-  opacity: 0.8;
-  transition: opacity var(--transition-base);
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
 }
 
-.kard:hover .kard-logo {
-  opacity: 1;
+.kard-mini .kard-logo {
+  font-size: 1rem;
 }
 
-/* ── Card Number / Username ────────────────────────────────── */
-.kard-middle {
-  position: relative;
-  z-index: 2;
+.kard-large .kard-logo {
+  font-size: 2rem;
 }
+
+/* ------------------------------------------------------------------ */
+/*  Card Number (Username)                                            */
+/* ------------------------------------------------------------------ */
 
 .kard-number {
+  position: absolute;
+  top: 50%;
+  left: 8%;
+  right: 8%;
+  transform: translateY(-50%);
   font-family: var(--font-mono);
-  font-size: clamp(16px, 5.5%, 26px);
-  font-weight: 600;
-  color: var(--text-primary);
-  letter-spacing: 0.12em;
-  text-shadow:
-    0 1px 2px rgba(0, 0, 0, 0.5),
-    0 0 20px rgba(139, 92, 246, 0.15);
-  /* Embossed / metallic look */
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.95) 0%,
-    rgba(200, 200, 220, 0.8) 50%,
-    rgba(255, 255, 255, 0.9) 100%
-  );
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.6));
+  font-size: 1.3rem;
+  letter-spacing: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  z-index: 3;
+  
+  /* Embossed effect */
+  color: #ddd;
+  text-shadow: 
+    -1px -1px 1px rgba(255,255,255,0.2), 
+    1px 1px 2px rgba(0,0,0,0.8);
+}
+
+.kard-at {
+  opacity: 0.5;
+  margin-right: 4px;
+}
+
+.kard-mini .kard-number {
+  font-size: 0.9rem;
+  letter-spacing: 1px;
+}
+
+.kard-large .kard-number {
+  font-size: 1.6rem;
+  letter-spacing: 3px;
+}
+
+/* ------------------------------------------------------------------ */
+/*  Card Bottom Info                                                  */
+/* ------------------------------------------------------------------ */
+
+.kard-bottom {
+  position: absolute;
+  bottom: 8%;
+  left: 8%;
+  right: 8%;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  z-index: 3;
 }
 
 .kard-name {
-  font-size: clamp(10px, 3%, 14px);
+  font-family: var(--font-sans);
   font-weight: 500;
-  color: var(--text-secondary);
-  margin-top: clamp(4px, 1.5%, 8px);
-  letter-spacing: 0.04em;
+  font-size: 0.9rem;
   text-transform: uppercase;
-}
-
-/* ── Bottom Row / Stats ────────────────────────────────────── */
-.kard-bottom {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  position: relative;
-  z-index: 2;
+  letter-spacing: 1px;
+  
+  /* Metallic effect */
+  color: #eee;
+  text-shadow: 1px 1px 1px rgba(0,0,0,0.8);
+  
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 60%;
 }
 
 .kard-stats {
   display: flex;
-  gap: clamp(12px, 4%, 24px);
-}
-
-.kard-stat {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.kard-stat-label {
-  font-size: clamp(7px, 2%, 9px);
-  font-weight: 500;
-  color: var(--text-tertiary);
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-}
-
-.kard-stat-value {
-  font-family: var(--font-mono);
-  font-size: clamp(11px, 3%, 15px);
-  font-weight: 600;
-  color: var(--text-primary);
-  letter-spacing: 0.02em;
-}
-
-.kard-stat-value--positive {
-  color: var(--accent-green);
-}
-
-.kard-stat-value--negative {
-  color: var(--accent-red);
-}
-
-/* ── Network / Card Type ───────────────────────────────────── */
-.kard-network {
-  display: flex;
   flex-direction: column;
   align-items: flex-end;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  opacity: 0.8;
   gap: 2px;
 }
 
-.kard-network-label {
-  font-size: clamp(7px, 2%, 9px);
-  color: var(--text-tertiary);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-}
-
-.kard-network-icon {
-  width: clamp(24px, 8%, 40px);
-  height: auto;
-  opacity: 0.6;
-}
-
-/* ── Size Variants ─────────────────────────────────────────── */
-
-/* Large — Profile page hero */
-.kard-large {
-  max-width: 520px;
-}
-
-.kard-large .kard-inner {
-  box-shadow:
-    0 16px 60px rgba(0, 0, 0, 0.5),
-    0 4px 16px rgba(139, 92, 246, 0.15),
-    inset 0 1px 0 rgba(255, 255, 255, 0.12);
-}
-
-.kard-large:hover .kard-inner {
-  transform: perspective(1000px) rotateY(3deg) rotateX(-2deg) scale(1.01);
-  box-shadow:
-    0 24px 80px rgba(0, 0, 0, 0.6),
-    0 8px 32px rgba(139, 92, 246, 0.25),
-    inset 0 1px 0 rgba(255, 255, 255, 0.15);
-}
-
-/* Mini — Sidebar / Compact */
-.kard-mini {
-  max-width: 220px;
-}
-
-.kard-mini .kard-front {
-  padding: clamp(10px, 4%, 16px);
-}
-
-.kard-mini .kard-chip {
-  width: 28px;
-  height: 28px;
-}
-
-.kard-mini .kard-number {
-  font-size: 12px;
-  letter-spacing: 0.08em;
+.kard-karma {
+  color: var(--accent-cyan);
+  font-weight: 600;
 }
 
 .kard-mini .kard-name {
-  font-size: 8px;
+  font-size: 0.7rem;
 }
-
 .kard-mini .kard-stats {
-  gap: 8px;
+  font-size: 0.55rem;
 }
 
-.kard-mini .kard-stat-label {
-  font-size: 6px;
+.kard-large .kard-name {
+  font-size: 1.1rem;
+}
+.kard-large .kard-stats {
+  font-size: 0.8rem;
 }
 
-.kard-mini .kard-stat-value {
-  font-size: 9px;
-}
+/* ------------------------------------------------------------------ */
+/*  Profile Page Context                                              */
+/* ------------------------------------------------------------------ */
 
-.kard-mini .kard-logo {
-  font-size: 10px;
-}
-
-.kard-mini .kard-shimmer::before {
-  animation-duration: 8s;
-}
-
-.kard-mini:hover .kard-inner {
-  transform: perspective(600px) rotateY(2deg) rotateX(-1deg) scale(1.03);
-}
-
-/* ── Kard — Interactive JS Tilt Enhancement ────────────────── */
-/* Applied via JS: data attributes control tilt angles */
-.kard[data-tilt] .kard-inner {
-  transition: transform 0.15s ease-out;
-}
-
-.kard--tilting .kard-inner {
-  transition: none;
-}
-
-/* ── Kard Skeleton Loading ─────────────────────────────────── */
-.kard-skeleton {
-  aspect-ratio: 85.6 / 53.98;
-  width: 100%;
-  max-width: 420px;
-  border-radius: var(--radius-lg);
-  background: linear-gradient(
-    90deg,
-    rgba(255, 255, 255, 0.02) 0%,
-    rgba(255, 255, 255, 0.06) 40%,
-    rgba(255, 255, 255, 0.02) 80%
-  );
-  background-size: 200% 100%;
-  animation: skeletonLoad 1.5s ease-in-out infinite;
-}
-
-/* ── Kard Flip Animation ───────────────────────────────────── */
-.kard--flipped .kard-inner {
-  transform: rotateY(180deg);
-}
-
-.kard-back {
-  position: absolute;
-  inset: 0;
-  backface-visibility: hidden;
-  transform: rotateY(180deg);
-  background: var(--bg-secondary);
-  border-radius: var(--radius-lg);
+.profile-header {
   display: flex;
+  flex-direction: column;
   align-items: center;
+  gap: var(--space-lg);
+  margin-bottom: var(--space-2xl);
+  text-align: center;
+}
+
+.profile-kard-wrapper {
+  perspective: 1000px;
+  margin: var(--space-md) auto;
+  width: 100%;
+  display: flex;
   justify-content: center;
-  padding: clamp(16px, 5%, 28px);
-  z-index: 1;
 }
 
-/* ── Kard Glow Effect ──────────────────────────────────────── */
-.kard-glow {
-  position: absolute;
-  inset: -2px;
-  border-radius: calc(var(--radius-lg) + 2px);
-  background: var(--gradient-holographic);
-  background-size: 300% 300%;
-  opacity: 0;
-  z-index: -1;
-  filter: blur(8px);
-  transition: opacity var(--transition-slow);
-  animation: shimmer 4s ease-in-out infinite;
+.profile-bio {
+  font-size: var(--font-md);
+  color: var(--text-secondary);
+  max-width: 500px;
+  line-height: 1.6;
 }
 
-.kard:hover .kard-glow {
-  opacity: 0.4;
+.profile-stats-row {
+  display: flex;
+  gap: var(--space-md);
+  margin-top: var(--space-sm);
 }
 
-/* ── Responsive ────────────────────────────────────────────── */
-@media (max-width: 768px) {
-  .kard {
-    max-width: 340px;
-  }
-
-  .kard-large {
-    max-width: 380px;
-  }
+.profile-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--space-md) var(--space-xl);
+  border-radius: var(--radius-lg);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
 }
 
-@media (max-width: 480px) {
-  .kard {
-    max-width: 300px;
-  }
+.profile-stat-value {
+  font-family: var(--font-mono);
+  font-size: var(--font-2xl);
+  font-weight: 700;
+  color: var(--text-primary);
+}
 
-  .kard-large {
-    max-width: 320px;
-  }
+.profile-stat-label {
+  font-size: var(--font-xs);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
 
-  .kard-mini {
-    max-width: 180px;
-  }
+.profile-actions {
+  margin-top: var(--space-md);
+}
+
+.profile-posts-header {
+  border-bottom: 1px solid var(--border);
+  padding-bottom: var(--space-md);
+  margin-bottom: var(--space-xl);
+}
+
+.profile-posts-title {
+  font-size: var(--font-xl);
+  font-weight: 600;
 }
