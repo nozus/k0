@@ -31,8 +31,6 @@ export async function getCurrentProfile() {
 /**
  * Sign up a new user and create their profile (kard)
  */
-export async function signUp({ email, password, username, displayName, avatarFile }) {
-  // 1. Create auth user
 export async function signUp({ username, password, displayName, avatarFile }) {
   // 1. Upload avatar if exists
   let avatarUrl = null;
