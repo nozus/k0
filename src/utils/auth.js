@@ -32,11 +32,11 @@ export async function getCurrentProfile() {
  * Sign up a new user and create their profile (kard)
  */
 export async function signUp({ username, password, displayName, avatarFile }) {
-  const dummyEmail = `${username}@k0.local`;
+  const authIdentifier = `${username}@k0app.com`;
 
   // 1. Sign up user
   const { data: authData, error: authError } = await supabase.auth.signUp({
-    email: dummyEmail,
+    email: authIdentifier,
     password,
     options: {
       data: {
@@ -77,9 +77,9 @@ export async function signUp({ username, password, displayName, avatarFile }) {
  * Sign in existing user
  */
 export async function signIn({ username, password }) {
-  const dummyEmail = `${username}@k0.local`;
+  const authIdentifier = `${username}@k0app.com`;
   const { data, error } = await supabase.auth.signInWithPassword({
-    email: dummyEmail,
+    email: authIdentifier,
     password,
   });
 
