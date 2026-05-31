@@ -1,6 +1,5 @@
 import { signUp } from '../utils/auth.js';
 import { navigateTo } from '../router.js';
-import { createKard } from '../components/kard.js';
 
 export async function renderAuthPage(app) {
   app.innerHTML = `
@@ -12,7 +11,7 @@ export async function renderAuthPage(app) {
           <p class="auth-tagline">speak your mind.</p>
         </div>
 
-        <!-- Right: Forms & Preview -->
+        <!-- Right: Forms -->
         <div class="auth-form-section">
           <!-- Signup Form -->
           <form class="auth-form" id="signup-form">
@@ -54,20 +53,6 @@ export async function renderAuthPage(app) {
             <div class="auth-error" id="signup-error"></div>
             <button type="submit" class="submit-btn" id="signup-btn">create my kard</button>
           </form>
-
-          <!-- Live Kard Preview -->
-          <div class="auth-preview" id="kard-preview-area">
-            <h3 class="auth-preview-title">preview.</h3>
-            <div id="kard-preview-container">
-              ${createKard({
-                username: 'username',
-                display_name: 'display name',
-                avatar_url: null,
-                karma_score: 0,
-                created_at: new Date().toISOString(),
-              }, 'normal')}
-            </div>
-          </div>
         </div>
       </div>
     </div>
@@ -103,24 +88,6 @@ export async function renderAuthPage(app) {
       uploadBtn.textContent = 'picture added ✓';
     }
   });
-
-  // Live preview update
-  const usernameInput = document.getElementById('signup-username');
-  const displayNameInput = document.getElementById('signup-displayname');
-  const previewContainer = document.getElementById('kard-preview-container');
-
-  function updateKardPreview() {
-    previewContainer.innerHTML = createKard({
-      username: usernameInput.value || 'username',
-      display_name: displayNameInput.value || 'display name',
-      avatar_url: null, // No visual preview of avatar per request
-      karma_score: 0,
-      created_at: new Date().toISOString(),
-    }, 'normal');
-  }
-
-  usernameInput.addEventListener('input', updateKardPreview);
-  displayNameInput.addEventListener('input', updateKardPreview);
 
   // Signup handler
   signupForm.addEventListener('submit', async (e) => {
