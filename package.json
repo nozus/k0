@@ -1,0 +1,26 @@
+{
+  "name": "k0",
+  "version": "1.0.0",
+  "description": "k0 — Speak your mind. A kontroversial social platform.",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nozus/k0.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/nozus/k0/issues"
+  },
+  "homepage": "https://github.com/nozus/k0#readme",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.106.2",
+    "vite": "^8.0.14"
+  }
+}
