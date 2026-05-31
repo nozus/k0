@@ -239,47 +239,15 @@
   flex: 1;
   background: var(--bg-card);
   border: 1px solid var(--border);
-  border-radius: var(--radius-xl);
-  border-top-left-radius: 4px; /* The tail corner */
+  border-radius: 0;
   padding: var(--space-lg);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  box-shadow: var(--shadow-md);
-  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  overflow: hidden; /* Contains the swipe overlay */
-  touch-action: pan-y; /* Allow vertical scroll, handle horizontal swipe in JS */
-}
-
-/* The Tail */
-.speech-bubble::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -12px;
-  width: 0;
-  height: 0;
-  border-top: 12px solid var(--border);
-  border-left: 12px solid transparent;
-  border-bottom: 12px solid transparent;
-  z-index: -1;
-}
-.speech-bubble::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -10px;
-  width: 0;
-  height: 0;
-  border-top: 10px solid var(--bg-tertiary); /* Approximate inner background */
-  border-left: 10px solid transparent;
-  border-bottom: 10px solid transparent;
-  z-index: 1;
+  overflow: hidden; 
+  touch-action: pan-y; 
 }
 
 /* Hover effect */
 .speech-bubble:hover {
-  border-color: rgba(139, 92, 246, 0.3);
-  box-shadow: 0 8px 32px rgba(139, 92, 246, 0.05);
+  border-color: var(--text-primary);
 }
 
 /* ------------------------------------------------------------------ */
@@ -382,23 +350,19 @@
 }
 
 .bubble-vote-up:hover {
-  color: var(--accent-green);
-  border-color: rgba(16, 185, 129, 0.3);
+  color: var(--text-primary);
 }
 .bubble-vote-up.bubble-vote--active {
-  background: rgba(16, 185, 129, 0.15);
-  color: var(--accent-green);
-  border-color: var(--accent-green);
+  color: var(--text-primary);
+  border-color: var(--text-primary);
 }
 
 .bubble-vote-down:hover {
-  color: var(--accent-red);
-  border-color: rgba(239, 68, 68, 0.3);
+  color: var(--text-primary);
 }
 .bubble-vote-down.bubble-vote--active {
-  background: rgba(239, 68, 68, 0.15);
-  color: var(--accent-red);
-  border-color: var(--accent-red);
+  color: var(--text-primary);
+  border-color: var(--text-primary);
 }
 
 .bubble-rating-count {

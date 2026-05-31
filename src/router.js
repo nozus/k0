@@ -72,9 +72,20 @@ async function handleRouteChange() {
 
   if (handler) {
     const app = document.getElementById('app');
-    const cleanup = await handler(app);
-    if (cleanup && typeof cleanup === 'function') {
-      currentCleanup = cleanup;
+    try {
+      const cleanup = await handler(app);
+      if (cleanup && typeof cleanup === 'function') {
+        currentCleanup = cleanup;
+      }
+    } catch (err) {
+      console.error('Route error:', err);
+      app.innerHTML = `
+        <div style="padding: 2rem; color: white; background: #111; min-height: 100vh; font-family: monospace;">
+          <h2>Error Loading Page</h2>
+          <p style="color: #ff5555">${err.message}</p>
+          <pre style="margin-top: 1rem; color: #888;">${err.stack}</pre>
+        </div>
+      `;
     }
   }
 }

@@ -33,14 +33,10 @@
 .sidebar-logo {
   display: inline-block;
   font-size: 42px;
-  font-weight: 800;
-  font-style: italic;
-  letter-spacing: -0.05em;
-  background: var(--gradient-primary);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  font-weight: 500;
   text-decoration: none;
   line-height: 1;
+  color: var(--text-primary);
 }
 
 .sidebar-tagline {
@@ -85,8 +81,6 @@
 .sidebar-link--active {
   background: rgba(255, 255, 255, 0.05);
   color: var(--text-primary);
-  border-left-color: var(--accent-violet);
-  box-shadow: inset 20px 0 20px -20px rgba(139, 92, 246, 0.2);
 }
 
 .sidebar-link-icon {
