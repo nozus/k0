@@ -32,29 +32,9 @@ export async function getCurrentProfile() {
  * Sign up a new user and create their profile (kard)
  */
 export async function signUp({ username, password, displayName, avatarFile }) {
-  // 1. Upload avatar if exists
-  let avatarUrl = null;
-  if (avatarFile) {
-    const fileExt = avatarFile.name.split('.').pop();
-    const fileName = `${Math.random()}.${fileExt}`;
-    const filePath = `${fileName}`;
-
-    const { error: uploadError } = await supabase.storage
-      .from('avatars')
-      .upload(filePath, avatarFile);
-
-    if (uploadError) {
-      throw new Error(`Avatar upload failed: ${uploadError.message}`);
-    }
-
-    const { data } = supabase.storage.from('avatars').getPublicUrl(filePath);
-    avatarUrl = data.publicUrl;
-  }
-
-  // Generate a dummy email so Supabase auth works without actually requiring an email
   const dummyEmail = `${username}@k0.local`;
 
-  // 2. Sign up user
+  // 1. Sign up user
   const { data: authData, error: authError } = await supabase.auth.signUp({
     email: dummyEmail,
     password,
@@ -62,15 +42,34 @@ export async function signUp({ username, password, displayName, avatarFile }) {
       data: {
         username,
         display_name: displayName,
-        avatar_url: avatarUrl,
       },
     },
   });
 
   if (authError) throw authError;
 
-  // Note: We use a trigger in Supabase to automatically create the profile row
-  // after the auth user is created.
+  // 2. If there is an avatar, upload it now that we are authenticated
+  if (avatarFile && authData.user) {
+    const fileExt = avatarFile.name.split('.').pop();
+    const fileName = `${authData.user.id}-${Math.random()}.${fileExt}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from('avatars')
+      .upload(fileName, avatarFile);
+
+    if (uploadError) {
+      console.error('Avatar upload failed:', uploadError.message);
+    } else {
+      const { data } = supabase.storage.from('avatars').getPublicUrl(fileName);
+      
+      // Update the profile with the new avatar URL
+      await supabase
+        .from('profiles')
+        .update({ avatar_url: data.publicUrl })
+        .eq('id', authData.user.id);
+    }
+  }
+
   return authData;
 }
 
