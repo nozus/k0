@@ -1,8 +1,3 @@
-import './styles/index.css';
-import './styles/auth.css';
-import './styles/feed.css';
-import './styles/kard.css';
-import './styles/sidebar.css';
 
 import { supabase } from './supabase.js';
 import { registerRoute, initRouter, navigateTo } from './router.js';
