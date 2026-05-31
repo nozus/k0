@@ -111,6 +111,7 @@ export async function renderAuthPage(app) {
   displayNameInput.addEventListener('input', updateKardPreview);
 
   // Signup handler
+  const signupForm = document.getElementById('signup-form');
   signupForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const signupError = document.getElementById('signup-error');
@@ -132,7 +133,7 @@ export async function renderAuthPage(app) {
       signupError.textContent = err.message;
     } finally {
       signupBtn.disabled = false;
-      signupBtn.innerHTML = '<span>Create My Kard</span>';
+      signupBtn.innerHTML = '<span>create my kard</span>';
     }
   });
 }
