@@ -1,275 +1,244 @@
-/* ------------------------------------------------------------------ */
-/*  Kard (Credit Card Profile) Component                              */
-/* ------------------------------------------------------------------ */
+/* ============================================================
+   k0 — Kard Component Styles
+   Minimal light theme
+   ============================================================ */
 
 .kard {
-  /* Standard credit card aspect ratio (85.6mm / 53.98mm) */
-  aspect-ratio: 1.5857;
-  width: 100%;
-  max-width: 340px;
-  border-radius: 16px;
-  position: relative;
-  overflow: hidden;
-  box-shadow: var(--shadow-lg), 0 20px 40px rgba(0, 0, 0, 0.4);
-  background: #111; /* Fallback */
-  color: white;
-  transform-style: preserve-3d;
-  will-change: transform;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-/* Size Variants */
-.kard-large {
-  max-width: 420px;
-  border-radius: 20px;
-}
-
-.kard-mini {
-  max-width: 240px;
-  border-radius: 12px;
-}
-
-/* ------------------------------------------------------------------ */
-/*  Background & Minimal Style                                        */
-/* ------------------------------------------------------------------ */
-
-.kard {
-  background: var(--bg-tertiary);
-}
-
-.kard::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(135deg, rgba(255,255,255,0.05), transparent);
-  pointer-events: none;
-}
-
-/* ------------------------------------------------------------------ */
-/*  Layout Elements                                                   */
-/* ------------------------------------------------------------------ */
-
-.kard-top {
-  position: absolute;
-  top: 10%;
-  left: 8%;
-  right: 8%;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  z-index: 3;
+  gap: 1rem;
+  padding: 1.5rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-alt);
+  transition: border-color 0.2s;
 }
 
-.kard-chip {
-  width: 14%;
-  aspect-ratio: 1.2;
-  background: linear-gradient(135deg, #ddd, #999);
-  border-radius: 6px;
-  overflow: hidden;
-  box-shadow: inset 0 1px 2px rgba(255,255,255,0.5), inset 0 -1px 2px rgba(0,0,0,0.2);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.kard:hover {
+  border-color: var(--text-muted);
 }
 
-.kard-chip-img {
-  width: 100%;
-  height: 100%;
+.kard-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius);
   object-fit: cover;
+  flex-shrink: 0;
 }
 
-.kard-chip-initials {
-  width: 100%;
-  height: 100%;
+.kard-avatar--initials {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: var(--font-mono);
-  font-size: 1.2rem;
-  font-weight: 600;
-  color: white;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
-}
-
-.kard-mini .kard-chip-initials {
-  font-size: 0.8rem;
-}
-
-.kard-logo {
-  font-family: var(--font-sans);
-  font-weight: 500;
-  font-size: 1.5rem;
-  color: var(--text-primary);
-}
-
-.kard-mini .kard-logo {
+  font-weight: 900;
   font-size: 1rem;
+  color: var(--bg);
+  background: var(--text-dark);
 }
 
-.kard-large .kard-logo {
-  font-size: 2rem;
-}
-
-/* ------------------------------------------------------------------ */
-/*  Card Number (Username)                                            */
-/* ------------------------------------------------------------------ */
-
-.kard-number {
-  position: absolute;
-  top: 50%;
-  left: 8%;
-  right: 8%;
-  transform: translateY(-50%);
-  font-family: var(--font-mono);
-  font-size: 1.3rem;
-  letter-spacing: 2px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  z-index: 3;
-  color: var(--text-primary);
-}
-
-.kard-at {
-  opacity: 0.5;
-  margin-right: 4px;
-}
-
-.kard-mini .kard-number {
-  font-size: 0.9rem;
-  letter-spacing: 1px;
-}
-
-.kard-large .kard-number {
-  font-size: 1.6rem;
-  letter-spacing: 3px;
-}
-
-/* ------------------------------------------------------------------ */
-/*  Card Bottom Info                                                  */
-/* ------------------------------------------------------------------ */
-
-.kard-bottom {
-  position: absolute;
-  bottom: 8%;
-  left: 8%;
-  right: 8%;
+.kard-body {
+  flex: 1;
   display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-  z-index: 3;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.kard-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .kard-name {
-  font-family: var(--font-sans);
-  font-weight: 400;
+  font-weight: 600;
+  color: var(--text-dark);
+  font-size: 1rem;
+}
+
+.kard-handle {
+  color: var(--text-muted);
   font-size: 0.9rem;
-  color: var(--text-secondary);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 60%;
 }
 
-.kard-stats {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  font-family: var(--font-mono);
-  font-size: 0.7rem;
-  opacity: 0.8;
-  gap: 2px;
+.kard-time {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  margin-left: auto;
 }
 
-.kard-karma {
-  color: var(--accent-cyan);
-  font-weight: 600;
-}
-
-.kard-mini .kard-name {
-  font-size: 0.7rem;
-}
-.kard-mini .kard-stats {
-  font-size: 0.55rem;
-}
-
-.kard-large .kard-name {
+.kard-content {
   font-size: 1.1rem;
-}
-.kard-large .kard-stats {
-  font-size: 0.8rem;
+  line-height: 1.5;
+  color: var(--text-dark);
+  word-break: break-word;
 }
 
-/* ------------------------------------------------------------------ */
-/*  Profile Page Context                                              */
-/* ------------------------------------------------------------------ */
-
-.profile-header {
+.kard-actions {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-lg);
-  margin-bottom: var(--space-2xl);
-  text-align: center;
+  gap: 1rem;
+  margin-top: 0.25rem;
 }
 
-.profile-kard-wrapper {
-  perspective: 1000px;
-  margin: var(--space-md) auto;
-  width: 100%;
-  display: flex;
-  justify-content: center;
-}
-
-.profile-bio {
-  font-size: var(--font-md);
-  color: var(--text-secondary);
-  max-width: 500px;
-  line-height: 1.6;
-}
-
-.profile-stats-row {
-  display: flex;
-  gap: var(--space-md);
-  margin-top: var(--space-sm);
-}
-
-.profile-stat {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: var(--space-md) var(--space-xl);
-  border-radius: var(--radius-lg);
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-}
-
-.profile-stat-value {
-  font-family: var(--font-mono);
-  font-size: var(--font-2xl);
-  font-weight: 700;
-  color: var(--text-primary);
-}
-
-.profile-stat-label {
-  font-size: var(--font-xs);
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  color: var(--text-secondary);
-  margin-top: 4px;
-}
-
-.profile-actions {
-  margin-top: var(--space-md);
-}
-
-.profile-posts-header {
-  border-bottom: 1px solid var(--border);
-  padding-bottom: var(--space-md);
-  margin-bottom: var(--space-xl);
-}
-
-.profile-posts-title {
-  font-size: var(--font-xl);
+.kard-action {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 0.9rem;
   font-weight: 600;
+  cursor: pointer;
+  font-family: var(--font);
+  transition: color 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.kard-action:hover {
+  color: var(--text-dark);
+}
+
+/* ── Speech Bubble variant ─────────────────────────────────── */
+.speech-bubble {
+  display: flex;
+  gap: 1rem;
+  padding: 1.5rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg);
+  transition: border-color 0.2s;
+}
+
+.speech-bubble:hover {
+  border-color: var(--text-muted);
+}
+
+.speech-bubble-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius);
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.speech-bubble-avatar--initials {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  font-size: 0.9rem;
+  color: var(--bg);
+  background: var(--text-dark);
+}
+
+.speech-bubble-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.speech-bubble-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.4rem;
+}
+
+.speech-bubble-name {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--text-dark);
+}
+
+.speech-bubble-handle {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+.speech-bubble-time {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  margin-left: auto;
+}
+
+.speech-bubble-content {
+  font-size: 1.05rem;
+  line-height: 1.5;
+  color: var(--text-dark);
+  word-break: break-word;
+  margin-bottom: 0.5rem;
+}
+
+.speech-bubble-actions {
+  display: flex;
+  gap: 1rem;
+}
+
+.speech-bubble-action {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: var(--font);
+  transition: color 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.speech-bubble-action:hover {
+  color: var(--text-dark);
+}
+
+/* ── Karma Score ───────────────────────────────────────────── */
+.karma-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+}
+
+/* ── Rate Modal ────────────────────────────────────────────── */
+.rate-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  animation: fadeIn 0.2s ease;
+}
+
+.rate-modal {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 2rem;
+  max-width: 400px;
+  width: 90%;
+}
+
+.rate-modal h3 {
+  font-size: 1.5rem;
+  font-weight: 900;
+  color: var(--text-dark);
+  margin-bottom: 1rem;
+  letter-spacing: -0.03em;
+}
+
+.rate-slider {
+  width: 100%;
+  margin: 1rem 0;
+}
+
+.rate-actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
 }

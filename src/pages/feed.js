@@ -20,38 +20,36 @@ export async function renderFeedPage(app) {
   app.innerHTML = `
     ${renderNavbar()}
     <div class="feed-layout">
-      ${renderSidebar('kontros')}
+      ${renderSidebar('feed')}
       <main class="feed-main">
         <div class="feed-header">
-          <h1 class="feed-title">
-            <span class="gradient-text">Kontros</span>
-          </h1>
+          <h1 class="feed-title">kontros.</h1>
           <div class="feed-filters">
-            <button class="filter-btn filter-btn--active" data-filter="newest" id="filter-newest">🕐 Newest</button>
-            <button class="filter-btn" data-filter="controversial" id="filter-controversial">🔥 Kontroversial</button>
-            <button class="filter-btn" data-filter="trending" id="filter-trending">📈 Trending</button>
+            <button class="filter-btn filter-btn--active" data-filter="newest" id="filter-newest">newest</button>
+            <button class="filter-btn" data-filter="controversial" id="filter-controversial">kontroversial</button>
+            <button class="filter-btn" data-filter="trending" id="filter-trending">trending</button>
           </div>
         </div>
 
-        <div class="compose-box glass" id="compose-box">
+        <div class="compose-box" id="compose-box">
           <div class="compose-avatar">
             ${currentUserProfile?.avatar_url
               ? `<img src="${currentUserProfile.avatar_url}" alt="You" class="compose-avatar-img" />`
-              : `<div class="compose-avatar-initials">${getInitials(currentUserProfile?.display_name || 'U')}</div>`
+              : `<div class="compose-avatar-initials">${getInitials(currentUserProfile?.display_name || currentUserProfile?.username || 'U')}</div>`
             }
           </div>
           <form class="compose-form" id="compose-form">
             <textarea 
               class="compose-input" 
               id="compose-input" 
-              placeholder="Drop a kontro... 🔥" 
+              placeholder="drop a kontro..." 
               maxlength="500"
               rows="1"
             ></textarea>
             <div class="compose-footer">
               <span class="compose-counter" id="compose-counter">0/500</span>
-              <button type="submit" class="btn-primary compose-submit" id="compose-submit" disabled>
-                Post
+              <button type="submit" class="compose-submit" id="compose-submit" disabled>
+                post
               </button>
             </div>
           </form>
@@ -73,9 +71,8 @@ export async function renderFeedPage(app) {
         </div>
 
         <div class="feed-empty" id="feed-empty" style="display:none">
-          <span class="feed-empty-icon">🌊</span>
-          <h3>No kontros yet</h3>
-          <p>Be the first to drop something kontroversial</p>
+          <h3>no kontros yet.</h3>
+          <p>be the first to drop something kontroversial.</p>
         </div>
       </main>
     </div>
@@ -145,7 +142,7 @@ function initCompose() {
       console.error('Error creating post:', err);
     } finally {
       submitBtn.disabled = false;
-      submitBtn.innerHTML = 'Post';
+      submitBtn.innerHTML = 'post';
     }
   });
 }
@@ -183,8 +180,8 @@ async function loadPosts() {
     console.error('Error loading posts:', err);
     if (skeleton) skeleton.style.display = 'none';
     postList.innerHTML = `
-      <div class="feed-error glass">
-        <span>⚠️ Failed to load kontros. Try refreshing.</span>
+      <div class="feed-error">
+        <span>failed to load kontros. try refreshing.</span>
       </div>
     `;
   } finally {
@@ -193,10 +190,11 @@ async function loadPosts() {
 }
 
 function getInitials(name) {
+  if (!name) return '?';
   return name
     .split(' ')
     .map(w => w[0])
     .join('')
-    .toUpperCase()
+    .toLowerCase()
     .slice(0, 2);
 }
