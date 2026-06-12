@@ -2,7 +2,7 @@ import { renderSidebar, initSidebar } from '../components/sidebar.js';
 import { renderNavbar } from '../components/navbar.js';
 import { createKard, initKardTilt } from '../components/kard.js';
 import { createSpeechBubble } from '../components/speech-bubble.js';
-import { getProfileById, getCurrentUser, getCurrentProfile } from '../utils/auth.js';
+import { getProfileById, getProfileByUsername, getCurrentUser, getCurrentProfile } from '../utils/auth.js';
 import { fetchUserPosts } from '../utils/posts.js';
 import { voteModeration } from '../utils/moderation.js';
 
@@ -16,9 +16,17 @@ export async function renderProfilePage(app, params = {}) {
   // Determine which profile to show
   let profile;
   let isOwnProfile = false;
+  const currentUserProfile = await getCurrentProfile();
 
-  if (params?.id && params.id !== currentUser.id) {
-    profile = await getProfileById(params.id);
+  if (params?.id && params.id !== currentUser.id && params.id !== currentUserProfile?.username) {
+    // Try by username first, since the speech bubble links to #/profile/username
+    profile = await getProfileByUsername(params.id);
+    
+    // Fallback to ID just in case
+    if (!profile) {
+      profile = await getProfileById(params.id);
+    }
+    
     if (!profile) {
       app.innerHTML = `
         <div class="profile-error">
@@ -30,7 +38,7 @@ export async function renderProfilePage(app, params = {}) {
       return;
     }
   } else {
-    profile = await getCurrentProfile();
+    profile = currentUserProfile;
     isOwnProfile = true;
     if (!profile) {
       window.location.hash = '/feed';
