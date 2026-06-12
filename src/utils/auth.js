@@ -48,6 +48,22 @@ export async function signUp({ username, password, displayName }) {
 
   if (authError) throw authError;
 
+  // Create profile row so foreign keys (posts, ratings, etc.) work
+  if (authData?.user) {
+    const { error: profileError } = await supabase
+      .from('profiles')
+      .insert({
+        id: authData.user.id,
+        username,
+        display_name: displayName || username,
+      });
+
+    if (profileError) {
+      console.error('Error creating profile:', profileError);
+      // Don't throw — the auth user was created; profile may exist via trigger
+    }
+  }
+
   return authData;
 }
 

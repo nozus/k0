@@ -3,7 +3,6 @@
  * Returns a fully interactive DOM element with voting, swiping, and moderation.
  */
 
-import { ratePost } from '../utils/posts.js';
 import { voteModeration } from '../utils/moderation.js';
 import { EMPTY_AVATAR } from '../utils/constants.js';
 
@@ -86,8 +85,6 @@ export function createSpeechBubble(post, currentUserId = null) {
     id: postId,
     user_id: authorId,
     content,
-    rating_sum: ratingSum,
-    rating_count: ratingCount,
     created_at: createdAt,
     profiles: { username, display_name: displayName, avatar_url: avatarUrl },
   } = post;
@@ -131,100 +128,46 @@ export function createSpeechBubble(post, currentUserId = null) {
 
   // Actions
   const actions = document.createElement('div');
-  actions.classList.add('bubble-actions');
-
-  const ratingDisplay = ratingSum ?? 0;
+  actions.classList.add('bubble-actions', 'bubble-actions--moderation');
 
   actions.innerHTML = `
-    <button class="bubble-action-btn bubble-vote-up" data-vote="1" aria-label="Upvote">
-      <span class="bubble-vote-arrow">▲</span>
+    <button class="bubble-mod-btn" data-action="strike" aria-label="Strike Author">
+      ⚠️ Strike
     </button>
-    <span class="bubble-rating-count">${ratingDisplay}</span>
-    <button class="bubble-action-btn bubble-vote-down" data-vote="-1" aria-label="Downvote">
-      <span class="bubble-vote-arrow">▼</span>
+    <button class="bubble-mod-btn" data-action="archive" aria-label="Archive Post">
+      📦 Archive
     </button>
-    <div class="bubble-mod-wrapper">
-      <button class="bubble-action-btn bubble-mod-btn" aria-label="Moderation options">
-        <span>…</span>
-      </button>
-      <div class="bubble-mod-dropdown bubble-mod-dropdown--hidden">
-        <button class="bubble-mod-option" data-action="delete_post">Vote to Delete Post</button>
-        <button class="bubble-mod-option" data-action="block_user">Vote to Block User</button>
-      </div>
-    </div>
+    <button class="bubble-mod-btn" data-action="delete" aria-label="Delete Post">
+      🗑️ Delete
+    </button>
   `;
 
   bubble.append(header, contentEl, actions);
   wrapper.append(avatarEl, bubble);
 
-  // ---- Voting handlers -------------------------------------------
-  const ratingCountEl = actions.querySelector('.bubble-rating-count');
-  const upBtn = actions.querySelector('.bubble-vote-up');
-  const downBtn = actions.querySelector('.bubble-vote-down');
-
-  let activeVote = 0; // tracks current vote: 1, -1, or 0
-
-  async function handleVote(value) {
-    // Toggle off if same vote
-    const newValue = activeVote === value ? 0 : value;
+  // ---- Moderation handlers ----------------------------------------
+  actions.addEventListener('click', async (e) => {
+    const btn = e.target.closest('.bubble-mod-btn');
+    if (!btn || btn.disabled) return;
+    
+    e.stopPropagation();
+    const action = btn.dataset.action;
+    const targetType = action === 'strike' ? 'user' : 'post';
+    const targetId = action === 'strike' ? authorId : postId;
 
     try {
-      if (newValue !== 0) {
-        await ratePost(postId, newValue);
-      }
-
-      activeVote = newValue;
-
-      // Update UI
-      upBtn.classList.toggle('bubble-vote--active', activeVote === 1);
-      downBtn.classList.toggle('bubble-vote--active', activeVote === -1);
-
-      // Optimistic count update
-      const delta = newValue - activeVote;
-      const current = parseInt(ratingCountEl.textContent, 10) || 0;
-      ratingCountEl.textContent = current + delta;
-    } catch (err) {
-      console.error('[speech-bubble] Vote failed:', err);
-    }
-  }
-
-  upBtn.addEventListener('click', () => handleVote(1));
-  downBtn.addEventListener('click', () => handleVote(-1));
-
-  // ---- Moderation dropdown ----------------------------------------
-  const modBtn = actions.querySelector('.bubble-mod-btn');
-  const modDropdown = actions.querySelector('.bubble-mod-dropdown');
-
-  modBtn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    modDropdown.classList.toggle('bubble-mod-dropdown--hidden');
-  });
-
-  // Close dropdown on outside click
-  document.addEventListener('click', () => {
-    modDropdown.classList.add('bubble-mod-dropdown--hidden');
-  });
-
-  modDropdown.addEventListener('click', async (e) => {
-    const option = e.target.closest('.bubble-mod-option');
-    if (!option) return;
-
-    e.stopPropagation();
-    const action = option.dataset.action;
-
-    try {
-      if (action === 'delete_post') {
-        await voteModeration('post', postId, 'delete');
-      } else if (action === 'block_user') {
-        await voteModeration('user', authorId, 'block');
-      }
-      option.textContent = '✓ Voted';
-      option.disabled = true;
+      btn.disabled = true;
+      const originalText = btn.innerHTML;
+      btn.textContent = '...';
+      
+      await voteModeration(targetType, targetId, action);
+      
+      btn.textContent = '✓ Voted';
     } catch (err) {
       console.error('[speech-bubble] Moderation vote failed:', err);
+      btn.disabled = false;
+      alert(err.message || 'Vote failed');
     }
-
-    modDropdown.classList.add('bubble-mod-dropdown--hidden');
   });
 
   // ---- Swipe gestures ---------------------------------------------
@@ -268,9 +211,9 @@ export function createSpeechBubble(post, currentUserId = null) {
     swipeOverlay.className = 'speech-bubble-swipe-overlay';
 
     if (deltaX > 80) {
-      handleVote(1);
+      actions.querySelector('[data-action="archive"]')?.click();
     } else if (deltaX < -80) {
-      handleVote(-1);
+      actions.querySelector('[data-action="strike"]')?.click();
     }
   });
 

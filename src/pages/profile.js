@@ -5,7 +5,6 @@ import { createSpeechBubble } from '../components/speech-bubble.js';
 import { getProfileById, getCurrentUser, getCurrentProfile } from '../utils/auth.js';
 import { fetchUserPosts } from '../utils/posts.js';
 import { voteModeration } from '../utils/moderation.js';
-import { showRateModal } from '../components/rate-modal.js';
 
 export async function renderProfilePage(app, params = {}) {
   const currentUser = await getCurrentUser();
@@ -33,6 +32,10 @@ export async function renderProfilePage(app, params = {}) {
   } else {
     profile = await getCurrentProfile();
     isOwnProfile = true;
+    if (!profile) {
+      window.location.hash = '/feed';
+      return;
+    }
   }
 
   const posts = await fetchUserPosts(profile.id);
@@ -55,8 +58,8 @@ export async function renderProfilePage(app, params = {}) {
               <span class="profile-stat-label">Kontros</span>
             </div>
             <div class="profile-stat glass">
-              <span class="profile-stat-value">${profile.karma_score || 0}</span>
-              <span class="profile-stat-label">Karma</span>
+              <span class="profile-stat-value">${profile.strikes || 0}/3</span>
+              <span class="profile-stat-label">Strikes</span>
             </div>
             <div class="profile-stat glass">
               <span class="profile-stat-value">${formatJoinDate(profile.created_at)}</span>
@@ -66,8 +69,8 @@ export async function renderProfilePage(app, params = {}) {
 
           ${!isOwnProfile ? `
             <div class="profile-actions">
-              <button class="btn-danger" id="block-user-btn">
-                🚫 Vote to Block
+              <button class="btn-danger" id="strike-user-btn">
+                ⚠️ Vote to Strike
               </button>
             </div>
           ` : `
@@ -117,12 +120,21 @@ export async function renderProfilePage(app, params = {}) {
     initKardTilt(kardWrapper);
   }
 
-  // Block user button
+  // Strike user button
   if (!isOwnProfile) {
-    const blockBtn = document.getElementById('block-user-btn');
-    if (blockBtn) {
-      blockBtn.addEventListener('click', () => {
-        showRateModal('user', profile.id, profile.username);
+    const strikeBtn = document.getElementById('strike-user-btn');
+    if (strikeBtn) {
+      strikeBtn.addEventListener('click', async () => {
+        try {
+          strikeBtn.disabled = true;
+          strikeBtn.textContent = '...';
+          await voteModeration('user', profile.id, 'strike');
+          strikeBtn.textContent = '✓ Voted';
+        } catch (err) {
+          console.error('[profile] Strike vote failed:', err);
+          strikeBtn.disabled = false;
+          alert(err.message || 'Vote failed');
+        }
       });
     }
   }

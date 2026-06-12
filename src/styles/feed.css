@@ -13,7 +13,8 @@
   flex: 1;
   padding: 4rem;
   overflow-y: auto;
-  max-width: 800px;
+  max-width: 680px;
+  margin: 0 auto;
 }
 
 /* ── Feed Header ───────────────────────────────────────────── */

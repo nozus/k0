@@ -90,7 +90,7 @@ export function createKard(profile, size = 'normal') {
     display_name: displayName,
     avatar_url: avatarUrl,
     bio,
-    karma_score: karmaScore,
+    strikes,
     created_at: createdAt,
   } = profile;
 
@@ -103,7 +103,8 @@ export function createKard(profile, size = 'normal') {
   // Chip: always an image — user's avatar or default
   const chipContent = `<img class="kard-chip-img" src="${escapeHtml(avatarUrl || EMPTY_AVATAR)}" alt="${escapeHtml(username)}" />`;
 
-  const karma = karmaScore ?? 0;
+  const strikeCount = strikes ?? 0;
+  const maxStrikes = 3;
   const joinDate = createdAt ? formatJoinDate(createdAt) : '--/--';
 
   return `
@@ -122,7 +123,7 @@ export function createKard(profile, size = 'normal') {
       <div class="kard-bottom">
         <div class="kard-name">${escapeHtml(displayName || username)}</div>
         <div class="kard-stats">
-          <span class="kard-karma" title="Karma score">✦ ${karma}</span>
+          <span class="kard-strike" title="Strikes">⚠️ ${strikeCount}/${maxStrikes}</span>
           <span class="kard-join" title="Member since">SINCE ${joinDate}</span>
         </div>
       </div>
