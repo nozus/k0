@@ -10,9 +10,7 @@
 export function renderNavbar() {
   return `
     <nav class="mobile-navbar" id="navbar">
-      <a href="#/feed" class="navbar-brand">
-        <span class="navbar-brand-text">k0</span>
-      </a>
+      <div></div>
       <button
         class="navbar-toggle"
         id="navbar-toggle"

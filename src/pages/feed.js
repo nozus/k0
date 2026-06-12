@@ -107,7 +107,7 @@ export async function renderFeedPage(app) {
   if (kardWrapper) initKardTilt(kardWrapper);
 
   // Load kraze (trending) posts
-  loadKrazePosts();
+  // loadKrazePosts();
 
   // Filter buttons
   document.querySelectorAll('.filter-btn').forEach(btn => {
