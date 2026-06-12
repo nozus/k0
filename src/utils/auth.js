@@ -31,10 +31,10 @@ export async function getCurrentProfile() {
 /**
  * Sign up a new user and create their profile (kard)
  */
-export async function signUp({ username, password, displayName, avatarFile }) {
+export async function signUp({ username, password, displayName }) {
   const authIdentifier = `${username}@k0app.com`;
 
-  // 1. Sign up user
+  // Sign up user
   const { data: authData, error: authError } = await supabase.auth.signUp({
     email: authIdentifier,
     password,
@@ -47,28 +47,6 @@ export async function signUp({ username, password, displayName, avatarFile }) {
   });
 
   if (authError) throw authError;
-
-  // 2. If there is an avatar, upload it now that we are authenticated
-  if (avatarFile && authData.user) {
-    const fileExt = avatarFile.name.split('.').pop();
-    const fileName = `${authData.user.id}-${Math.random()}.${fileExt}`;
-
-    const { error: uploadError } = await supabase.storage
-      .from('avatars')
-      .upload(fileName, avatarFile);
-
-    if (uploadError) {
-      console.error('Avatar upload failed:', uploadError.message);
-    } else {
-      const { data } = supabase.storage.from('avatars').getPublicUrl(fileName);
-      
-      // Update the profile with the new avatar URL
-      await supabase
-        .from('profiles')
-        .update({ avatar_url: data.publicUrl })
-        .eq('id', authData.user.id);
-    }
-  }
 
   return authData;
 }

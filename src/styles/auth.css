@@ -1,6 +1,6 @@
 /* ============================================================
    k0 — Auth Page Styles
-   Nozus-style split layout: big logo left, form right
+   Nozus-style split layout: big logo left, choices right
    ============================================================ */
 
 /* ── Auth Container ────────────────────────────────────────── */
@@ -56,6 +56,59 @@
   gap: 2.5rem;
   width: 100%;
   max-width: 400px;
+  min-height: 200px;
+}
+
+/* ── Choice Buttons (Initial State) ────────────────────────── */
+.auth-choice {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+  animation: fadeIn 0.4s ease both;
+}
+
+.auth-choice--hidden {
+  display: none;
+}
+
+.auth-choice-btn {
+  background: none;
+  border: none;
+  text-align: left;
+  font-size: 2rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-family: var(--font);
+  letter-spacing: -0.03em;
+  padding: 0;
+  transition: color var(--transition);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.auth-choice-btn:hover {
+  color: var(--text-dark);
+}
+
+/* ── Back Button ───────────────────────────────────────────── */
+.auth-back-btn {
+  background: none;
+  border: none;
+  text-align: left;
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-family: var(--font);
+  letter-spacing: -0.03em;
+  padding: 0;
+  margin-bottom: 0.5rem;
+  transition: color var(--transition);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.auth-back-btn:hover {
+  color: var(--text-dark);
 }
 
 /* ── Auth Forms ────────────────────────────────────────────── */
@@ -63,6 +116,11 @@
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  animation: fadeIn 0.4s ease both;
+}
+
+.auth-form--hidden {
+  display: none !important;
 }
 
 .auth-form h2 {
@@ -104,23 +162,6 @@
   color: var(--text-dark);
 }
 
-/* ── Avatar Upload ─────────────────────────────────────────── */
-.upload-avatar-btn {
-  text-align: left;
-  padding: 0;
-  color: var(--text-muted);
-  font-weight: 600;
-  font-size: 1.1rem;
-  cursor: pointer;
-  background: none;
-  border: none;
-  transition: color 0.2s;
-}
-
-.upload-avatar-btn:hover {
-  color: var(--text-dark);
-}
-
 /* ── Error Message ─────────────────────────────────────────── */
 .auth-error {
   font-size: 1rem;
@@ -155,14 +196,15 @@
     align-items: center;
   }
 
+  .auth-choice-btn,
+  .auth-back-btn {
+    text-align: center;
+  }
+
   .input-control,
   .submit-btn,
   .password-wrapper {
     max-width: 100%;
-  }
-
-  .upload-avatar-btn {
-    text-align: center;
   }
 }
 
@@ -178,5 +220,13 @@
 
   .auth-tagline {
     font-size: 1.2rem;
+  }
+
+  .auth-choice-btn {
+    font-size: 1.5rem;
+  }
+
+  .auth-back-btn {
+    font-size: 1.3rem;
   }
 }

@@ -2,7 +2,8 @@ import { renderSidebar, initSidebar } from '../components/sidebar.js';
 import { renderNavbar } from '../components/navbar.js';
 import { createSpeechBubble } from '../components/speech-bubble.js';
 import { fetchPosts, createPost } from '../utils/posts.js';
-import { getCurrentUser, getCurrentProfile } from '../utils/auth.js';
+import { getCurrentUser, getCurrentProfile, updateProfile } from '../utils/auth.js';
+import { EMPTY_AVATAR } from '../utils/constants.js';
 
 let currentFilter = 'newest';
 let isLoading = false;
@@ -33,10 +34,7 @@ export async function renderFeedPage(app) {
 
         <div class="compose-box" id="compose-box">
           <div class="compose-avatar">
-            ${currentUserProfile?.avatar_url
-              ? `<img src="${currentUserProfile.avatar_url}" alt="You" class="compose-avatar-img" />`
-              : `<div class="compose-avatar-initials">${getInitials(currentUserProfile?.display_name || currentUserProfile?.username || 'U')}</div>`
-            }
+            <img src="${currentUserProfile?.avatar_url || EMPTY_AVATAR}" alt="You" class="compose-avatar-img" />
           </div>
           <form class="compose-form" id="compose-form">
             <textarea 
@@ -90,6 +88,76 @@ export async function renderFeedPage(app) {
       currentFilter = btn.dataset.filter;
       await loadPosts();
     });
+  });
+
+  // Prompt user to set handle if they haven't yet (display_name still equals username)
+  if (currentUserProfile && currentUserProfile.display_name === currentUserProfile.username) {
+    showHandleSetup(user, currentUserProfile);
+  }
+}
+
+function showHandleSetup(user, profile) {
+  // Create overlay
+  const overlay = document.createElement('div');
+  overlay.classList.add('handle-setup-overlay');
+  overlay.innerHTML = `
+    <div class="handle-setup-modal">
+      <h2 class="handle-setup-title">set your handle.</h2>
+      <p class="handle-setup-subtitle">this is the name people will see on your kard.</p>
+      <form class="handle-setup-form" id="handle-setup-form">
+        <input
+          type="text"
+          class="input-control"
+          id="handle-input"
+          placeholder="display name."
+          required
+          maxlength="30"
+          value=""
+        />
+        <div class="auth-error" id="handle-error"></div>
+        <button type="submit" class="submit-btn" id="handle-submit">save.</button>
+        <button type="button" class="handle-skip-btn" id="handle-skip">skip for now.</button>
+      </form>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+
+  // Animate in
+  requestAnimationFrame(() => overlay.classList.add('handle-setup-overlay--visible'));
+
+  const form = document.getElementById('handle-setup-form');
+  const handleInput = document.getElementById('handle-input');
+  const handleError = document.getElementById('handle-error');
+  const handleSubmit = document.getElementById('handle-submit');
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const newName = handleInput.value.trim();
+    if (!newName) return;
+
+    handleSubmit.disabled = true;
+    handleSubmit.innerHTML = '<span class="spinner"></span>';
+    handleError.textContent = '';
+    handleError.classList.remove('visible');
+
+    try {
+      await updateProfile(user.id, { display_name: newName });
+      overlay.classList.remove('handle-setup-overlay--visible');
+      setTimeout(() => overlay.remove(), 300);
+      // Refresh page to show new name
+      window.location.reload();
+    } catch (err) {
+      handleError.textContent = err.message;
+      handleError.classList.add('visible');
+    } finally {
+      handleSubmit.disabled = false;
+      handleSubmit.innerHTML = 'save.';
+    }
+  });
+
+  document.getElementById('handle-skip').addEventListener('click', () => {
+    overlay.classList.remove('handle-setup-overlay--visible');
+    setTimeout(() => overlay.remove(), 300);
   });
 }
 

@@ -3,6 +3,8 @@
  * Supports normal / large / mini sizes, holographic shimmer, and 3D tilt.
  */
 
+import { EMPTY_AVATAR } from '../utils/constants.js';
+
 /* ------------------------------------------------------------------ */
 /*  Helpers                                                           */
 /* ------------------------------------------------------------------ */
@@ -98,10 +100,8 @@ export function createKard(profile, size = 'normal') {
       ? ' kard-mini'
       : '';
 
-  // Chip: avatar image or initials
-  const chipContent = avatarUrl
-    ? `<img class="kard-chip-img" src="${escapeHtml(avatarUrl)}" alt="${escapeHtml(username)}" />`
-    : `<div class="kard-chip-initials" style="background:${avatarGradient(username)}">${getInitials(displayName || username)}</div>`;
+  // Chip: always an image — user's avatar or default
+  const chipContent = `<img class="kard-chip-img" src="${escapeHtml(avatarUrl || EMPTY_AVATAR)}" alt="${escapeHtml(username)}" />`;
 
   const karma = karmaScore ?? 0;
   const joinDate = createdAt ? formatJoinDate(createdAt) : '--/--';

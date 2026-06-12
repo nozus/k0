@@ -5,6 +5,7 @@
 
 import { ratePost } from '../utils/posts.js';
 import { voteModeration } from '../utils/moderation.js';
+import { EMPTY_AVATAR } from '../utils/constants.js';
 
 /* ------------------------------------------------------------------ */
 /*  Helpers                                                           */
@@ -100,19 +101,11 @@ export function createSpeechBubble(post, currentUserId = null) {
   const avatarEl = document.createElement('div');
   avatarEl.classList.add('speech-bubble-avatar');
 
-  if (avatarUrl) {
-    const img = document.createElement('img');
-    img.src = avatarUrl;
-    img.alt = username;
-    img.classList.add('speech-bubble-avatar-img');
-    avatarEl.appendChild(img);
-  } else {
-    const initialsDiv = document.createElement('div');
-    initialsDiv.classList.add('speech-bubble-avatar-initials');
-    initialsDiv.textContent = getInitials(displayName || username);
-    initialsDiv.style.background = avatarGradient(username);
-    avatarEl.appendChild(initialsDiv);
-  }
+  const img = document.createElement('img');
+  img.src = avatarUrl || EMPTY_AVATAR;
+  img.alt = username;
+  img.classList.add('speech-bubble-avatar-img');
+  avatarEl.appendChild(img);
 
   // ---- Bubble ----------------------------------------------------
   const bubble = document.createElement('div');
