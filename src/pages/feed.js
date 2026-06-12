@@ -1,6 +1,7 @@
 import { renderSidebar, initSidebar } from '../components/sidebar.js';
 import { renderNavbar } from '../components/navbar.js';
 import { createSpeechBubble } from '../components/speech-bubble.js';
+import { createKard, initKardTilt } from '../components/kard.js';
 import { fetchPosts, createPost } from '../utils/posts.js';
 import { getCurrentUser, getCurrentProfile, updateProfile } from '../utils/auth.js';
 import { EMPTY_AVATAR } from '../utils/constants.js';
@@ -28,7 +29,7 @@ export async function renderFeedPage(app) {
           <div class="feed-filters">
             <button class="filter-btn filter-btn--active" data-filter="newest" id="filter-newest">newest</button>
             <button class="filter-btn" data-filter="controversial" id="filter-controversial">kontroversial</button>
-            <button class="filter-btn" data-filter="trending" id="filter-trending">trending</button>
+            <button class="filter-btn" data-filter="trending" id="filter-trending">kraze</button>
           </div>
         </div>
 
@@ -73,12 +74,40 @@ export async function renderFeedPage(app) {
           <p>be the first to drop something kontroversial.</p>
         </div>
       </main>
+
+      <aside class="right-sidebar" id="right-sidebar">
+        <div class="right-sidebar-section kard-section" id="kard-section">
+          <h3 class="right-sidebar-title">my kard.</h3>
+          <div class="kard-wrapper" id="kard-wrapper">
+            ${currentUserProfile ? createKard(currentUserProfile, 'mini') : ''}
+          </div>
+        </div>
+
+        <div class="right-sidebar-divider"></div>
+
+        <div class="right-sidebar-section kraze-section" id="kraze-section">
+          <h3 class="right-sidebar-title">kraze.</h3>
+          <p class="right-sidebar-subtitle">what's hot right now</p>
+          <div class="kraze-list" id="kraze-list">
+            <div class="kraze-loading">
+              <span class="spinner"></span>
+            </div>
+          </div>
+        </div>
+      </aside>
     </div>
   `;
 
   initSidebar();
   initCompose();
   await loadPosts();
+
+  // Init kard tilt in right sidebar
+  const kardWrapper = document.getElementById('kard-wrapper');
+  if (kardWrapper) initKardTilt(kardWrapper);
+
+  // Load kraze (trending) posts
+  loadKrazePosts();
 
   // Filter buttons
   document.querySelectorAll('.filter-btn').forEach(btn => {
@@ -196,6 +225,15 @@ function initCompose() {
       input.value = '';
       input.style.height = 'auto';
       counter.textContent = '0/500';
+      
+      // Ensure profiles is attached for optimistic rendering
+      if (!newPost.profiles || Array.isArray(newPost.profiles)) {
+        newPost.profiles = {
+          username: currentUserProfile.username,
+          display_name: currentUserProfile.display_name,
+          avatar_url: currentUserProfile.avatar_url
+        };
+      }
       
       // Prepend new post to feed
       const postList = document.getElementById('post-list');

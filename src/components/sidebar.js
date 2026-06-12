@@ -14,7 +14,7 @@ export function renderSidebar(currentPage = 'feed') {
   const navLinks = [
     { id: 'feed',    label: 'kontros.',  href: '#/feed',    disabled: false },
     { id: 'profile', label: 'my kard.',  href: '#/profile', disabled: false },
-    { id: 'trending',label: 'trending.', href: '#/trending',disabled: true  },
+    { id: 'kraze',   label: 'kraze.',    href: '#/kraze',   disabled: false  },
   ];
 
   const linksHtml = navLinks

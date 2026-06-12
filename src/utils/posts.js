@@ -8,7 +8,7 @@ export async function fetchPosts({ filter = 'newest', limit = 20, offset = 0 } =
     .from('posts')
     .select(`
       *,
-      profiles:user_id (
+      profiles (
         username,
         display_name,
         avatar_url
@@ -61,7 +61,7 @@ export async function createPost(content) {
     })
     .select(`
       *,
-      profiles:user_id (
+      profiles (
         username,
         display_name,
         avatar_url
@@ -167,7 +167,7 @@ export async function fetchUserPosts(userId) {
     .from('posts')
     .select(`
       *,
-      profiles:user_id (
+      profiles (
         username,
         display_name,
         avatar_url

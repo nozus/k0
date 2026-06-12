@@ -9,7 +9,7 @@
  */
 export function renderNavbar() {
   return `
-    <nav class="navbar" id="navbar">
+    <nav class="mobile-navbar" id="navbar">
       <a href="#/feed" class="navbar-brand">
         <span class="navbar-brand-text">k0</span>
       </a>
