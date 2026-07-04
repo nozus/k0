@@ -128,7 +128,7 @@
   align-items: flex-end;
 }
 
-.kard-strike,
+.kard-stat,
 .kard-join {
   font-size: 0.65rem;
   font-weight: 600;
@@ -164,7 +164,7 @@
   font-size: 0.7rem;
 }
 
-.kard-mini .kard-strike,
+.kard-mini .kard-stat,
 .kard-mini .kard-join {
   font-size: 0.6rem;
 }
@@ -193,7 +193,7 @@
   font-size: 0.9rem;
 }
 
-.kard-large .kard-strike,
+.kard-large .kard-stat,
 .kard-large .kard-join {
   font-size: 0.75rem;
 }

@@ -7,12 +7,13 @@ import { supabase } from '../supabase.js';
 
 /**
  * Renders the sidebar HTML.
- * @param {string} currentPage - The active page identifier ('feed' | 'profile')
+ * @param {string} currentPage - The active page identifier
  * @returns {string} HTML string for the sidebar
  */
-export function renderSidebar(currentPage = 'feed') {
+export function renderSidebar(currentPage = 'explore') {
   const navLinks = [
-    { id: 'feed',    label: 'kontros.',  href: '#/feed',    disabled: false },
+    { id: 'explore', label: 'explore.',  href: '#/explore', disabled: false },
+    { id: 'create',  label: 'create.',   href: '#/create',  disabled: false },
     { id: 'profile', label: 'my kard.',  href: '#/profile', disabled: false },
   ];
 
@@ -35,7 +36,7 @@ export function renderSidebar(currentPage = 'feed') {
   return `
     <aside class="sidebar" id="sidebar">
       <!-- Logo -->
-      <a href="#/feed" class="sidebar-logo">k0.</a>
+      <a href="#/explore" class="sidebar-logo">k0.</a>
 
       <!-- Navigation -->
       <nav class="sidebar-nav">

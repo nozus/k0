@@ -8,7 +8,7 @@ export async function renderAuthPage(app) {
         <!-- Left: Branding -->
         <div class="auth-branding">
           <h1 class="auth-logo">k0.</h1>
-          <p class="auth-tagline">speak your mind.</p>
+          <p class="auth-tagline">rate everything.</p>
         </div>
 
         <!-- Right: Auth Options -->
@@ -140,7 +140,7 @@ export async function renderAuthPage(app) {
         password: document.getElementById('signup-password').value,
         displayName: username,
       });
-      navigateTo('/feed');
+      navigateTo('/explore');
     } catch (err) {
       signupError.textContent = err.message;
       signupError.classList.add('visible');
@@ -165,7 +165,7 @@ export async function renderAuthPage(app) {
         username: document.getElementById('login-username').value.trim(),
         password: document.getElementById('login-password').value,
       });
-      navigateTo('/feed');
+      navigateTo('/explore');
     } catch (err) {
       loginError.textContent = err.message;
       loginError.classList.add('visible');

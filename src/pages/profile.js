@@ -1,10 +1,11 @@
 import { renderSidebar, initSidebar } from '../components/sidebar.js';
 import { renderNavbar } from '../components/navbar.js';
 import { createKard, initKardTilt } from '../components/kard.js';
-import { createSpeechBubble } from '../components/speech-bubble.js';
+import { createItemCard } from '../components/item-card.js';
+import { createProfileReviewCard } from '../components/review-card.js';
 import { getProfileById, getProfileByUsername, getCurrentUser, getCurrentProfile } from '../utils/auth.js';
-import { fetchUserPosts } from '../utils/posts.js';
-import { voteModeration } from '../utils/moderation.js';
+import { fetchUserItems } from '../utils/items.js';
+import { fetchUserReviews } from '../utils/reviews.js';
 
 export async function renderProfilePage(app, params = {}) {
   const currentUser = await getCurrentUser();
@@ -19,10 +20,10 @@ export async function renderProfilePage(app, params = {}) {
   const currentUserProfile = await getCurrentProfile();
 
   if (params?.id && params.id !== currentUser.id && params.id !== currentUserProfile?.username) {
-    // Try by username first, since the speech bubble links to #/profile/username
+    // Try by username first
     profile = await getProfileByUsername(params.id);
     
-    // Fallback to ID just in case
+    // Fallback to ID
     if (!profile) {
       profile = await getProfileById(params.id);
     }
@@ -30,9 +31,9 @@ export async function renderProfilePage(app, params = {}) {
     if (!profile) {
       app.innerHTML = `
         <div class="profile-error">
-          <h2>Kard not found</h2>
-          <p>This user doesn't exist or has been blocked.</p>
-          <a href="#/feed" class="btn-primary">Back to Kontros</a>
+          <h2>kard not found.</h2>
+          <p>this user doesn't exist or has been blocked.</p>
+          <a href="#/explore" class="submit-btn" style="display:inline-block;max-width:200px;text-align:center">back to explore</a>
         </div>
       `;
       return;
@@ -41,12 +42,13 @@ export async function renderProfilePage(app, params = {}) {
     profile = currentUserProfile;
     isOwnProfile = true;
     if (!profile) {
-      window.location.hash = '/feed';
+      window.location.hash = '/explore';
       return;
     }
   }
 
-  const posts = await fetchUserPosts(profile.id);
+  const items = await fetchUserItems(profile.id);
+  const reviews = await fetchUserReviews(profile.id);
 
   app.innerHTML = `
     ${renderNavbar()}
@@ -62,48 +64,49 @@ export async function renderProfilePage(app, params = {}) {
 
           <div class="profile-stats-row">
             <div class="profile-stat glass">
-              <span class="profile-stat-value">${posts.length}</span>
-              <span class="profile-stat-label">Kontros</span>
+              <span class="profile-stat-value">${items.length}</span>
+              <span class="profile-stat-label">items</span>
             </div>
             <div class="profile-stat glass">
-              <span class="profile-stat-value">${profile.strikes || 0}/3</span>
-              <span class="profile-stat-label">Strikes</span>
+              <span class="profile-stat-value">${reviews.length}</span>
+              <span class="profile-stat-label">reviews</span>
             </div>
             <div class="profile-stat glass">
               <span class="profile-stat-value">${formatJoinDate(profile.created_at)}</span>
-              <span class="profile-stat-label">Joined</span>
+              <span class="profile-stat-label">joined</span>
             </div>
           </div>
-
-          ${!isOwnProfile ? `
-            <div class="profile-actions">
-              <button class="btn-danger" id="strike-user-btn">
-                ⚠️ Vote to Strike
-              </button>
-            </div>
-          ` : `
-            <div class="profile-actions">
-              <button class="btn-secondary" id="edit-profile-btn">
-                ✏️ Edit Kard
-              </button>
-            </div>
-          `}
         </div>
 
-        <div class="profile-posts-header">
-          <h2 class="profile-posts-title">
-            ${isOwnProfile ? 'My' : `@${profile.username}'s`} Kontros
-          </h2>
+        <div class="profile-tabs">
+          <button class="profile-tab profile-tab--active" data-tab="items" id="tab-items">
+            items (${items.length})
+          </button>
+          <button class="profile-tab" data-tab="reviews" id="tab-reviews">
+            reviews (${reviews.length})
+          </button>
         </div>
 
-        <div class="post-list" id="profile-post-list">
-          ${posts.length === 0 ? `
+        <div class="profile-tab-content" id="tab-content-items">
+          ${items.length === 0 ? `
             <div class="feed-empty">
-              <span class="feed-empty-icon">🤫</span>
-              <h3>No kontros yet</h3>
-              <p>${isOwnProfile ? 'Time to speak your mind' : 'This user hasn\'t posted yet'}</p>
+              <h3>no items yet.</h3>
+              <p>${isOwnProfile ? 'create something for people to rate.' : "this user hasn't created any items yet."}</p>
+              ${isOwnProfile ? '<a href="#/create" class="submit-btn" style="display:inline-block;max-width:200px;text-align:center;margin-top:1rem">create.</a>' : ''}
             </div>
           ` : ''}
+          <div class="item-grid profile-item-grid" id="profile-items-grid"></div>
+        </div>
+
+        <div class="profile-tab-content profile-tab-content--hidden" id="tab-content-reviews">
+          ${reviews.length === 0 ? `
+            <div class="feed-empty">
+              <h3>no reviews yet.</h3>
+              <p>${isOwnProfile ? 'go explore and rate something.' : "this user hasn't reviewed anything yet."}</p>
+              ${isOwnProfile ? '<a href="#/explore" class="submit-btn" style="display:inline-block;max-width:200px;text-align:center;margin-top:1rem">explore.</a>' : ''}
+            </div>
+          ` : ''}
+          <div class="profile-reviews-list" id="profile-reviews-list"></div>
         </div>
       </main>
     </div>
@@ -111,14 +114,25 @@ export async function renderProfilePage(app, params = {}) {
 
   initSidebar();
 
-  // Render posts
-  if (posts.length > 0) {
-    const postList = document.getElementById('profile-post-list');
-    posts.forEach((post, index) => {
-      const bubble = createSpeechBubble(post, currentUser.id);
-      bubble.style.animationDelay = `${index * 0.08}s`;
-      bubble.classList.add('animate-slideUp');
-      postList.appendChild(bubble);
+  // Render items
+  if (items.length > 0) {
+    const itemsGrid = document.getElementById('profile-items-grid');
+    items.forEach((item, index) => {
+      const card = createItemCard(item);
+      card.style.animationDelay = `${index * 0.06}s`;
+      card.classList.add('animate-slideUp');
+      itemsGrid.appendChild(card);
+    });
+  }
+
+  // Render reviews
+  if (reviews.length > 0) {
+    const reviewsList = document.getElementById('profile-reviews-list');
+    reviews.forEach((review, index) => {
+      const card = createProfileReviewCard(review);
+      card.style.animationDelay = `${index * 0.06}s`;
+      card.classList.add('animate-slideUp');
+      reviewsList.appendChild(card);
     });
   }
 
@@ -128,24 +142,19 @@ export async function renderProfilePage(app, params = {}) {
     initKardTilt(kardWrapper);
   }
 
-  // Strike user button
-  if (!isOwnProfile) {
-    const strikeBtn = document.getElementById('strike-user-btn');
-    if (strikeBtn) {
-      strikeBtn.addEventListener('click', async () => {
-        try {
-          strikeBtn.disabled = true;
-          strikeBtn.textContent = '...';
-          await voteModeration('user', profile.id, 'strike');
-          strikeBtn.textContent = '✓ Voted';
-        } catch (err) {
-          console.error('[profile] Strike vote failed:', err);
-          strikeBtn.disabled = false;
-          alert(err.message || 'Vote failed');
-        }
+  // Tab switching
+  document.querySelectorAll('.profile-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.profile-tab').forEach(t => t.classList.remove('profile-tab--active'));
+      tab.classList.add('profile-tab--active');
+
+      const tabName = tab.dataset.tab;
+      document.querySelectorAll('.profile-tab-content').forEach(tc => {
+        tc.classList.add('profile-tab-content--hidden');
       });
-    }
-  }
+      document.getElementById(`tab-content-${tabName}`).classList.remove('profile-tab-content--hidden');
+    });
+  });
 }
 
 function escapeHtml(text) {
@@ -156,6 +165,6 @@ function escapeHtml(text) {
 
 function formatJoinDate(dateStr) {
   const date = new Date(dateStr);
-  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const months = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
   return `${months[date.getMonth()]} ${date.getFullYear()}`;
 }
