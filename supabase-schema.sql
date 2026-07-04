@@ -45,7 +45,6 @@ CREATE TABLE IF NOT EXISTS items (
   title TEXT NOT NULL,
   description TEXT DEFAULT '',
   category TEXT NOT NULL DEFAULT 'other',
-  image_url TEXT,
   avg_rating NUMERIC(3,2) DEFAULT 0,
   review_count INTEGER DEFAULT 0,
   created_at TIMESTAMPTZ DEFAULT NOW()
@@ -117,10 +116,6 @@ INSERT INTO storage.buckets (id, name, public)
 VALUES ('avatars', 'avatars', true)
 ON CONFLICT (id) DO NOTHING;
 
-INSERT INTO storage.buckets (id, name, public) 
-VALUES ('item-images', 'item-images', true)
-ON CONFLICT (id) DO NOTHING;
-
 -- Storage policies
 DROP POLICY IF EXISTS "Avatar images are publicly accessible" ON storage.objects;
 DROP POLICY IF EXISTS "Users can upload their own avatar" ON storage.objects;
@@ -138,14 +133,12 @@ CREATE POLICY "Users can update their own avatar"
   ON storage.objects FOR UPDATE
   USING (bucket_id = 'avatars' AND auth.role() = 'authenticated');
 
--- Item images policies
-DROP POLICY IF EXISTS "Item images are publicly accessible" ON storage.objects;
-DROP POLICY IF EXISTS "Users can upload item images" ON storage.objects;
-
-CREATE POLICY "Item images are publicly accessible"
-  ON storage.objects FOR SELECT
-  USING (bucket_id = 'item-images');
-
-CREATE POLICY "Users can upload item images"
-  ON storage.objects FOR INSERT
-  WITH CHECK (bucket_id = 'item-images' AND auth.role() = 'authenticated');
+-- 6. BACKFILL ORPHANED USERS
+-- If you encountered a foreign key error on created_by, this rescues existing auth users.
+INSERT INTO public.profiles (id, username, display_name)
+SELECT 
+  id, 
+  COALESCE(raw_user_meta_data->>'username', 'user_' || substr(id::text, 1, 8)), 
+  COALESCE(raw_user_meta_data->>'display_name', 'User')
+FROM auth.users
+ON CONFLICT (id) DO NOTHING;

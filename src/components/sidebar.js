@@ -14,7 +14,7 @@ export function renderSidebar(currentPage = 'explore') {
   const navLinks = [
     { id: 'explore', label: 'explore.',  href: '#/explore', disabled: false },
     { id: 'create',  label: 'create.',   href: '#/create',  disabled: false },
-    { id: 'profile', label: 'my kard.',  href: '#/profile', disabled: false },
+    { id: 'profile', label: 'profile.',  href: '#/profile', disabled: false },
   ];
 
   const linksHtml = navLinks

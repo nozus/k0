@@ -47,12 +47,9 @@ export async function renderItemPage(app, params = {}) {
 
         <div class="item-hero">
           <div class="item-hero-image" id="item-hero-image">
-            ${item.image_url
-              ? `<img src="${escapeHtml(item.image_url)}" alt="${escapeHtml(item.title)}" class="item-hero-img" />`
-              : `<div class="item-hero-placeholder" style="background:${gradientBg}">
-                  <span>${escapeHtml(item.category)}</span>
-                </div>`
-            }
+            <div class="item-hero-placeholder" style="background:${gradientBg}">
+              <span>${escapeHtml(item.category)}</span>
+            </div>
           </div>
           <div class="item-hero-info">
             <span class="item-card-badge">${escapeHtml(item.category)}</span>

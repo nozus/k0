@@ -1,11 +1,11 @@
 import { renderSidebar, initSidebar } from '../components/sidebar.js';
 import { renderNavbar } from '../components/navbar.js';
-import { createKard, initKardTilt } from '../components/kard.js';
 import { createItemCard } from '../components/item-card.js';
 import { createProfileReviewCard } from '../components/review-card.js';
 import { getProfileById, getProfileByUsername, getCurrentUser, getCurrentProfile } from '../utils/auth.js';
 import { fetchUserItems } from '../utils/items.js';
 import { fetchUserReviews } from '../utils/reviews.js';
+import { EMPTY_AVATAR } from '../utils/constants.js';
 
 export async function renderProfilePage(app, params = {}) {
   const currentUser = await getCurrentUser();
@@ -56,8 +56,12 @@ export async function renderProfilePage(app, params = {}) {
       ${renderSidebar('profile')}
       <main class="feed-main profile-main">
         <div class="profile-header">
-          <div class="profile-kard-wrapper" id="profile-kard">
-            ${createKard(profile, 'large')}
+          <div class="profile-avatar">
+            <img src="${escapeHtml(profile.avatar_url || EMPTY_AVATAR)}" alt="avatar" class="profile-avatar-img" />
+          </div>
+          <div class="profile-info">
+            <h1 class="profile-name">${escapeHtml(profile.display_name || profile.username)}</h1>
+            <span class="profile-username">@${escapeHtml(profile.username)}</span>
           </div>
           
           ${profile.bio ? `<p class="profile-bio">${escapeHtml(profile.bio)}</p>` : ''}
@@ -134,12 +138,6 @@ export async function renderProfilePage(app, params = {}) {
       card.classList.add('animate-slideUp');
       reviewsList.appendChild(card);
     });
-  }
-
-  // Init kard tilt
-  const kardWrapper = document.getElementById('profile-kard');
-  if (kardWrapper) {
-    initKardTilt(kardWrapper);
   }
 
   // Tab switching

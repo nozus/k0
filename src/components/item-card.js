@@ -33,7 +33,6 @@ export function createItemCard(item) {
     id,
     title,
     category,
-    image_url: imageUrl,
     avg_rating: avgRating,
     review_count: reviewCount,
     profiles: { username },
@@ -47,20 +46,11 @@ export function createItemCard(item) {
   const imageArea = document.createElement('div');
   imageArea.classList.add('item-card-image');
 
-  if (imageUrl) {
-    const img = document.createElement('img');
-    img.src = imageUrl;
-    img.alt = title;
-    img.classList.add('item-card-img');
-    img.loading = 'lazy';
-    imageArea.appendChild(img);
-  } else {
-    imageArea.style.background = categoryGradient(category);
-    const placeholder = document.createElement('span');
-    placeholder.classList.add('item-card-placeholder');
-    placeholder.textContent = category;
-    imageArea.appendChild(placeholder);
-  }
+  imageArea.style.background = categoryGradient(category);
+  const placeholder = document.createElement('span');
+  placeholder.classList.add('item-card-placeholder');
+  placeholder.textContent = category;
+  imageArea.appendChild(placeholder);
 
   // Content area
   const content = document.createElement('div');

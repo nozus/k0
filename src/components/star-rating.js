@@ -65,6 +65,16 @@ export function createStarInput(initialValue = 0, onChange = null) {
       currentValue = i;
       hoverValue = 0;
       updateDisplay();
+
+      // Trigger pop animation
+      dot.classList.remove('star-pop-anim');
+      void dot.offsetWidth; // trigger reflow
+      dot.classList.add('star-pop-anim');
+      
+      dot.addEventListener('animationend', () => {
+        dot.classList.remove('star-pop-anim');
+      }, { once: true });
+
       if (onChange) onChange(currentValue);
     });
 

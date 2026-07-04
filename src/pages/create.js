@@ -60,16 +60,6 @@ export async function renderCreatePage(app) {
             <span class="compose-counter" id="create-counter">0/500</span>
           </div>
 
-          <div class="create-field">
-            <label class="create-label" for="create-image">image url. (optional)</label>
-            <input
-              type="url"
-              class="input-control"
-              id="create-image"
-              placeholder="https://..."
-            />
-          </div>
-
           <div class="auth-error" id="create-error"></div>
 
           <button type="submit" class="submit-btn create-submit" id="create-submit" disabled>
@@ -134,7 +124,6 @@ export async function renderCreatePage(app) {
     const title = titleInput.value.trim();
     const description = descInput.value.trim();
     const category = selectedCategory;
-    const image_url = document.getElementById('create-image').value.trim() || null;
 
     if (!title || !category) return;
 
@@ -142,7 +131,7 @@ export async function renderCreatePage(app) {
     submitBtn.innerHTML = '<span class="spinner"></span>';
 
     try {
-      const newItem = await createItem({ title, description, category, image_url });
+      const newItem = await createItem({ title, description, category });
       navigateTo(`/item/${newItem.id}`);
     } catch (err) {
       console.error('Error creating item:', err);
