@@ -2,7 +2,7 @@
  * k0 Paint Tools
  * 
  * Each tool defines:
- *   - name, icon (emoji), cursor style
+ *   - name, icon (SVG string), cursor style
  *   - renderStroke(ctx, points, color, size, opacity, time, wigglePreset)
  *   - renderPreview(ctx, x, y, size, color) — cursor preview
  */
@@ -41,12 +41,79 @@ function seededRandom(seed) {
 }
 
 // ────────────────────────────────────────────────────────
+// SVG Icon helpers — 18x18 monoline icons
+// ────────────────────────────────────────────────────────
+
+function svgIcon(paths, { viewBox = '0 0 24 24', strokeWidth = '2' } = {}) {
+  return `<svg width="18" height="18" viewBox="${viewBox}" fill="none" stroke="currentColor" stroke-width="${strokeWidth}" stroke-linecap="round" stroke-linejoin="round">${paths}</svg>`;
+}
+
+const ICONS = {
+  paintbrush: svgIcon(
+    `<path d="M18.37 2.63a2.12 2.12 0 0 1 3 3L14 13l-4 1 1-4z"/>` +
+    `<path d="M9 14.5A3.5 3.5 0 0 0 5.5 18c-1.2 0-2.7.5-3.5 1 .6-2 2-3.5 4-4a3.5 3.5 0 0 0 3-0.5z"/>`
+  ),
+  pencil: svgIcon(
+    `<path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>` +
+    `<path d="m15 5 4 4"/>`
+  ),
+  marker: svgIcon(
+    `<path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z"/>` +
+    `<line x1="16" y1="8" x2="2" y2="22"/>` +
+    `<line x1="17.5" y1="15" x2="9" y2="15"/>`
+  ),
+  spray: svgIcon(
+    `<rect x="9" y="9" width="6" height="13" rx="2"/>` +
+    `<path d="M12 9V5"/>` +
+    `<circle cx="4" cy="6" r="1" fill="currentColor" stroke="none"/>` +
+    `<circle cx="3" cy="10" r="1" fill="currentColor" stroke="none"/>` +
+    `<circle cx="5" cy="13" r="1" fill="currentColor" stroke="none"/>` +
+    `<circle cx="20" cy="6" r="1" fill="currentColor" stroke="none"/>` +
+    `<circle cx="21" cy="10" r="1" fill="currentColor" stroke="none"/>` +
+    `<circle cx="19" cy="13" r="1" fill="currentColor" stroke="none"/>` +
+    `<path d="M10 5h4"/>`
+  ),
+  crayon: svgIcon(
+    `<path d="M20 17V5a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v12"/>` +
+    `<path d="m4 17 4 4 4-4 4 4 4-4"/>`,
+    { strokeWidth: '1.8' }
+  ),
+  glitter: svgIcon(
+    `<path d="M12 2l2.4 7.2L22 12l-7.6 2.8L12 22l-2.4-7.2L2 12l7.6-2.8z"/>` +
+    `<circle cx="19" cy="5" r="1" fill="currentColor" stroke="none"/>` +
+    `<circle cx="5" cy="19" r="1" fill="currentColor" stroke="none"/>`,
+    { strokeWidth: '1.5' }
+  ),
+  eraser: svgIcon(
+    `<path d="m7 21-4.3-4.3c-1-1-1-2.5 0-3.4l9.6-9.6c1-1 2.5-1 3.4 0l5.6 5.6c1 1 1 2.5 0 3.4L13 21"/>` +
+    `<path d="M22 21H7"/>` +
+    `<path d="m5 11 9 9"/>`
+  ),
+  rainbow: svgIcon(
+    `<path d="M2 18a10 10 0 0 1 20 0"/>` +
+    `<path d="M5 18a7 7 0 0 1 14 0"/>` +
+    `<path d="M8 18a4 4 0 0 1 8 0"/>`,
+    { strokeWidth: '1.8' }
+  ),
+  neon: svgIcon(
+    `<path d="M9 18h6"/>` +
+    `<path d="M10 22h4"/>` +
+    `<path d="M12 2a6 6 0 0 0-6 6c0 2.22 1.21 4.16 3 5.19V15a1 1 0 0 0 1 1h4a1 1 0 0 0 1-1v-1.81c1.79-1.03 3-2.97 3-5.19a6 6 0 0 0-6-6z"/>` +
+    `<line x1="4" y1="4" x2="5" y2="5"/>` +
+    `<line x1="20" y1="4" x2="19" y2="5"/>` +
+    `<line x1="1" y1="12" x2="3" y2="12"/>` +
+    `<line x1="21" y1="12" x2="23" y2="12"/>`,
+    { strokeWidth: '1.8' }
+  ),
+};
+
+// ────────────────────────────────────────────────────────
 // Tool definitions
 // ────────────────────────────────────────────────────────
 
 const paintbrush = {
   name: 'paintbrush',
-  icon: '🖌️',
+  icon: ICONS.paintbrush,
   label: 'Paintbrush',
   cursor: 'crosshair',
   wiggle: WIGGLE_PRESETS.paintbrush,
@@ -97,7 +164,7 @@ const paintbrush = {
 
 const pencil = {
   name: 'pencil',
-  icon: '✏️',
+  icon: ICONS.pencil,
   label: 'Pencil',
   cursor: 'crosshair',
   wiggle: WIGGLE_PRESETS.pencil,
@@ -146,7 +213,7 @@ const pencil = {
 
 const marker = {
   name: 'marker',
-  icon: '🖍️',
+  icon: ICONS.marker,
   label: 'Marker',
   cursor: 'crosshair',
   wiggle: WIGGLE_PRESETS.marker,
@@ -194,7 +261,7 @@ const marker = {
 
 const spray = {
   name: 'spray',
-  icon: '🎨',
+  icon: ICONS.spray,
   label: 'Spray Can',
   cursor: 'crosshair',
   wiggle: WIGGLE_PRESETS.spray,
@@ -241,7 +308,7 @@ const spray = {
 
 const crayon = {
   name: 'crayon',
-  icon: '🖊️',
+  icon: ICONS.crayon,
   label: 'Crayon',
   cursor: 'crosshair',
   wiggle: WIGGLE_PRESETS.crayon,
@@ -289,7 +356,7 @@ const crayon = {
 
 const glitter = {
   name: 'glitter',
-  icon: '✨',
+  icon: ICONS.glitter,
   label: 'Glitter Pen',
   cursor: 'crosshair',
   wiggle: WIGGLE_PRESETS.glitter,
@@ -368,7 +435,7 @@ const glitter = {
 
 const eraser = {
   name: 'eraser',
-  icon: '🧹',
+  icon: ICONS.eraser,
   label: 'Eraser',
   cursor: 'crosshair',
   wiggle: WIGGLE_PRESETS.eraser,
@@ -419,7 +486,7 @@ const eraser = {
 
 const rainbow = {
   name: 'rainbow',
-  icon: '🌈',
+  icon: ICONS.rainbow,
   label: 'Rainbow',
   cursor: 'crosshair',
   wiggle: WIGGLE_PRESETS.rainbow,
@@ -465,7 +532,7 @@ const rainbow = {
 
 const neon = {
   name: 'neon',
-  icon: '💡',
+  icon: ICONS.neon,
   label: 'Neon',
   cursor: 'crosshair',
   wiggle: WIGGLE_PRESETS.neon,

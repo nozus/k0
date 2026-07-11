@@ -111,7 +111,31 @@ CREATE POLICY "Users can insert own moderation votes"
   ON moderation_votes FOR INSERT
   WITH CHECK (auth.uid() = voter_id);
 
--- 5. STORAGE BUCKETS
+-- 5. DRAWINGS — shared paint canvas strokes
+DROP TABLE IF EXISTS drawings CASCADE;
+
+CREATE TABLE IF NOT EXISTS drawings (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID REFERENCES profiles(id) ON DELETE CASCADE NOT NULL,
+  stroke_data JSONB NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE drawings ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Drawings are viewable by everyone"
+  ON drawings FOR SELECT
+  USING (true);
+
+CREATE POLICY "Users can insert own drawings"
+  ON drawings FOR INSERT
+  WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can delete own drawings"
+  ON drawings FOR DELETE
+  USING (auth.uid() = user_id);
+
+-- 6. STORAGE BUCKETS
 INSERT INTO storage.buckets (id, name, public) 
 VALUES ('avatars', 'avatars', true)
 ON CONFLICT (id) DO NOTHING;
@@ -133,7 +157,7 @@ CREATE POLICY "Users can update their own avatar"
   ON storage.objects FOR UPDATE
   USING (bucket_id = 'avatars' AND auth.role() = 'authenticated');
 
--- 6. BACKFILL ORPHANED USERS
+-- 7. BACKFILL ORPHANED USERS
 -- If you encountered a foreign key error on created_by, this rescues existing auth users.
 -- Uses a CTE with ROW_NUMBER to prevent duplicate username errors.
 WITH ranked_users AS (

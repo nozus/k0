@@ -143,10 +143,19 @@
 
 /* ── Tool Icon Wiggle ─────────────────────────────────────── */
 .toolbar__tool-icon {
-  display: inline-block;
-  font-size: 1.1rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
   animation: toolWiggle 3s ease-in-out infinite;
   transform-origin: center;
+}
+
+.toolbar__tool-icon svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
 }
 
 @keyframes toolWiggle {
@@ -454,37 +463,50 @@
 .color-picker__custom-label {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 0.65rem;
+  gap: 10px;
+  font-size: 0.7rem;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.3);
+  color: rgba(255, 255, 255, 0.4);
   cursor: pointer;
+  padding: 6px 8px;
+  border-radius: 8px;
+  transition: background 0.2s;
+}
+
+.color-picker__custom-label:hover {
+  background: rgba(255, 255, 255, 0.06);
 }
 
 .color-picker__native {
   -webkit-appearance: none;
   appearance: none;
-  width: 32px;
-  height: 24px;
-  border: none;
-  border-radius: 5px;
+  width: 36px;
+  height: 28px;
+  border: 2px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
   cursor: pointer;
   padding: 0;
-  background: none;
+  background: rgba(255, 255, 255, 0.06);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.color-picker__native:hover {
+  border-color: rgba(255, 255, 255, 0.25);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 .color-picker__native::-webkit-color-swatch-wrapper {
-  padding: 0;
+  padding: 3px;
 }
 
 .color-picker__native::-webkit-color-swatch {
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 5px;
+  border: none;
+  border-radius: 4px;
 }
 
 .color-picker__native::-moz-color-swatch {
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 5px;
+  border: none;
+  border-radius: 4px;
 }
 
 /* ── Responsive — Mobile ──────────────────────────────────── */
@@ -734,7 +756,7 @@
   font-weight: 600;
 }
 
-/* ── Profile Card ─────────────────────────────────────────── */
+/* ── Profile Card (no avatar) ─────────────────────────────── */
 .profile-card {
   display: flex;
   align-items: center;
@@ -743,24 +765,6 @@
   background: rgba(255, 255, 255, 0.04);
   border-radius: 14px;
   border: 1px solid rgba(255, 255, 255, 0.06);
-}
-
-.profile-card__avatar {
-  width: 56px;
-  height: 56px;
-  border-radius: 14px;
-  background: linear-gradient(135deg, #FF6B6B, #9B5DE5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.profile-card__avatar-letter {
-  font-size: 1.5rem;
-  font-weight: 900;
-  color: white;
-  text-transform: uppercase;
 }
 
 .profile-card__info {
@@ -907,4 +911,64 @@
   font-weight: 700;
   color: rgba(255, 255, 255, 0.6);
   margin: 0 2px;
+}
+
+/* ── Confirm Delete Modal ─────────────────────────────────── */
+.confirm-delete {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 16px;
+  padding: 8px 0;
+}
+
+.confirm-delete__icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: rgba(255, 107, 107, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: confirmIconPulse 2s ease-in-out infinite;
+}
+
+@keyframes confirmIconPulse {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 107, 107, 0.15); }
+  50% { transform: scale(1.05); box-shadow: 0 0 20px 4px rgba(255, 107, 107, 0.1); }
+}
+
+.confirm-delete__text {
+  font-size: 1rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.85);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.confirm-delete__subtext {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.35);
+}
+
+.confirm-delete__actions {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+  justify-content: center;
+  margin-top: 4px;
+}
+
+.modal__btn--danger-fill {
+  background: #FF6B6B;
+  color: white;
+  padding: 10px 24px;
+}
+
+.modal__btn--danger-fill:hover {
+  background: #ff5252;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(255, 107, 107, 0.3);
 }

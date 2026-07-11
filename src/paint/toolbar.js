@@ -7,6 +7,7 @@
 
 import { ALL_TOOLS } from './tools.js';
 import { ColorPicker } from './color-picker.js';
+import { openConfirmDeleteModal } from './modals.js';
 
 export class Toolbar {
   constructor(container, paintEngine) {
@@ -65,7 +66,7 @@ export class Toolbar {
         <button class="toolbar__btn toolbar__btn--action" id="btn-redo" title="redo (ctrl+shift+z)">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.13-9.36L23 10"></path></svg>
         </button>
-        <button class="toolbar__btn toolbar__btn--action toolbar__btn--danger" id="btn-clear" title="clear canvas">
+        <button class="toolbar__btn toolbar__btn--action toolbar__btn--danger" id="btn-clear" title="delete your drawings">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
         </button>
       </div>
@@ -117,8 +118,11 @@ export class Toolbar {
     this.el.querySelector('#btn-undo').addEventListener('click', () => this.engine.undo());
     this.el.querySelector('#btn-redo').addEventListener('click', () => this.engine.redo());
     this.el.querySelector('#btn-clear').addEventListener('click', () => {
-      if (this.engine.strokes.length === 0) return;
-      this.engine.clear();
+      if (this.engine.myStrokes.length === 0) return;
+      // Show confirmation modal before deleting
+      openConfirmDeleteModal(() => {
+        this.engine.clear();
+      });
     });
     
     // ── Logo Menu ──

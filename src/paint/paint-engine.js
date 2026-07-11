@@ -2,11 +2,14 @@
  * k0 Paint Engine
  * 
  * Manages the canvas, stroke history, undo/redo, zoom/pan, and rendering.
+ * Persists strokes to Supabase so all users see everyone's drawings.
  * Delegates stroke rendering to individual tool renderers.
  */
 
 import { WiggleAnimator, createWigglePoint } from './wiggle.js';
 import { getToolByName } from './tools.js';
+import { supabase } from '../supabase.js';
+import { getCurrentUser } from '../utils/auth.js';
 
 export class PaintEngine {
   constructor(canvas) {
@@ -17,10 +20,15 @@ export class PaintEngine {
     this.offscreenCanvas = document.createElement('canvas');
     this.offscreenCtx = this.offscreenCanvas.getContext('2d');
 
-    // State
-    this.strokes = [];
+    // State — separate own strokes from others
+    this.myStrokes = [];        // Current user's strokes (undoable)
+    this.otherStrokes = [];     // Other users' strokes (read-only)
     this.currentStroke = null;
     this.undoneStrokes = [];
+
+    // User info (loaded async)
+    this.userId = null;
+    this._loadUser();
 
     // Current settings
     this.currentTool = getToolByName('paintbrush');
@@ -73,11 +81,128 @@ export class PaintEngine {
     // Callbacks
     this.onStrokeEnd = null;
     this.onToolChange = null;
+
+    // Load all existing drawings from Supabase
+    this._loadAllStrokes();
+  }
+
+  /** Getter for backward compatibility — returns all strokes combined */
+  get strokes() {
+    return [...this.otherStrokes, ...this.myStrokes];
   }
 
   /** Request a re-render on the next animation frame */
   requestRender() {
     this.animator.requestRender();
+  }
+
+  // ── User ──────────────────────────────────────────────
+
+  async _loadUser() {
+    try {
+      const user = await getCurrentUser();
+      this.userId = user?.id || null;
+    } catch (e) {
+      console.error('Failed to load user:', e);
+    }
+  }
+
+  // ── Supabase persistence ──────────────────────────────
+
+  async _loadAllStrokes() {
+    try {
+      const { data, error } = await supabase
+        .from('drawings')
+        .select('id, user_id, stroke_data')
+        .order('created_at', { ascending: true });
+
+      if (error) {
+        console.error('Failed to load drawings:', error);
+        return;
+      }
+
+      if (!data || data.length === 0) return;
+
+      // Wait for user ID if not yet loaded
+      if (!this.userId) {
+        try {
+          const user = await getCurrentUser();
+          this.userId = user?.id || null;
+        } catch (_) { /* ignore */ }
+      }
+
+      // Split into my strokes and other strokes
+      for (const row of data) {
+        const stroke = row.stroke_data;
+        stroke._dbId = row.id;  // Track database ID for deletion
+        stroke._userId = row.user_id;
+
+        if (row.user_id === this.userId) {
+          this.myStrokes.push(stroke);
+        } else {
+          this.otherStrokes.push(stroke);
+        }
+      }
+
+      this.requestRender();
+    } catch (e) {
+      console.error('Error loading strokes:', e);
+    }
+  }
+
+  async _saveStroke(stroke) {
+    if (!this.userId) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('drawings')
+        .insert({
+          user_id: this.userId,
+          stroke_data: {
+            tool: stroke.tool,
+            color: stroke.color,
+            size: stroke.size,
+            opacity: stroke.opacity,
+            points: stroke.points,
+          },
+        })
+        .select('id')
+        .single();
+
+      if (error) {
+        console.error('Failed to save stroke:', error);
+        return;
+      }
+
+      // Attach the DB id so we can delete later
+      stroke._dbId = data.id;
+      stroke._userId = this.userId;
+    } catch (e) {
+      console.error('Error saving stroke:', e);
+    }
+  }
+
+  async _deleteStrokeFromDb(stroke) {
+    if (!stroke._dbId) return;
+    try {
+      await supabase.from('drawings').delete().eq('id', stroke._dbId);
+    } catch (e) {
+      console.error('Error deleting stroke:', e);
+    }
+  }
+
+  /** Delete all of the current user's drawings from Supabase */
+  async deleteMyStrokes() {
+    if (!this.userId) return;
+    try {
+      await supabase.from('drawings').delete().eq('user_id', this.userId);
+    } catch (e) {
+      console.error('Error deleting all strokes:', e);
+    }
+    this.myStrokes = [];
+    this.undoneStrokes = [];
+    this.currentStroke = null;
+    this.requestRender();
   }
 
   // ── Canvas sizing ──────────────────────────────────────
@@ -275,7 +400,9 @@ export class PaintEngine {
     this.isDrawing = false;
 
     if (this.currentStroke && this.currentStroke.points.length > 1) {
-      this.strokes.push(this.currentStroke);
+      this.myStrokes.push(this.currentStroke);
+      // Save to Supabase asynchronously
+      this._saveStroke(this.currentStroke);
       if (this.onStrokeEnd) this.onStrokeEnd(this.strokes.length);
     }
     this.currentStroke = null;
@@ -318,27 +445,29 @@ export class PaintEngine {
   // ── Undo / Redo ────────────────────────────────────────
 
   undo() {
-    if (this.strokes.length === 0) return;
-    const stroke = this.strokes.pop();
+    if (this.myStrokes.length === 0) return;
+    const stroke = this.myStrokes.pop();
     this.undoneStrokes.push(stroke);
+    // Delete from DB
+    this._deleteStrokeFromDb(stroke);
     this.requestRender();
   }
 
   redo() {
     if (this.undoneStrokes.length === 0) return;
     const stroke = this.undoneStrokes.pop();
-    this.strokes.push(stroke);
+    this.myStrokes.push(stroke);
+    // Re-save to DB
+    this._saveStroke(stroke);
     this.requestRender();
   }
 
-  canUndo() { return this.strokes.length > 0; }
+  canUndo() { return this.myStrokes.length > 0; }
   canRedo() { return this.undoneStrokes.length > 0; }
 
   clear() {
-    this.strokes = [];
-    this.undoneStrokes = [];
-    this.currentStroke = null;
-    this.requestRender();
+    // Only clears current user's strokes — use deleteMyStrokes for persistent delete
+    this.deleteMyStrokes();
   }
 
   resetView() {
@@ -370,8 +499,9 @@ export class PaintEngine {
     offCtx.translate(this.panX, this.panY);
     offCtx.scale(this.zoom, this.zoom);
 
-    // Draw all completed strokes to offscreen canvas
-    for (const stroke of this.strokes) {
+    // Draw all strokes — others first, then mine on top
+    const allStrokes = this.strokes;
+    for (const stroke of allStrokes) {
       const tool = getToolByName(stroke.tool);
       tool.renderStroke(offCtx, stroke.points, stroke.color, stroke.size, stroke.opacity, time);
     }

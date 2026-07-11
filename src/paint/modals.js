@@ -1,7 +1,7 @@
 /**
  * k0 Modal System
  * 
- * Reusable glassmorphism modals for Profile and Settings.
+ * Reusable glassmorphism modals for Profile, Settings, and Confirmations.
  */
 
 import { getCurrentUser, getCurrentProfile, updateProfile } from '../utils/auth.js';
@@ -47,7 +47,7 @@ function closeModal(id) {
 }
 
 // ────────────────────────────────────────────────────────
-// Profile Modal
+// Profile Modal (no avatar/profile picture)
 // ────────────────────────────────────────────────────────
 
 export async function openProfileModal() {
@@ -64,9 +64,6 @@ export async function openProfileModal() {
 
   const contentHTML = `
     <div class="profile-card">
-      <div class="profile-card__avatar">
-        <span class="profile-card__avatar-letter">${username.charAt(0).toUpperCase()}</span>
-      </div>
       <div class="profile-card__info">
         <span class="profile-card__username">@${username}</span>
         <span class="profile-card__display">${displayName}</span>
@@ -117,12 +114,6 @@ export async function openProfileModal() {
       status.style.color = '#6BCB77';
       saveBtn.textContent = 'save.';
       saveBtn.disabled = false;
-
-      // Update avatar letter if display name changed
-      const letter = modal.querySelector('.profile-card__avatar-letter');
-      if (letter && newDisplayName) {
-        letter.textContent = newDisplayName.charAt(0).toUpperCase();
-      }
     } catch (err) {
       status.textContent = err.message || 'failed to save.';
       status.style.color = '#FF6B6B';
@@ -223,5 +214,43 @@ export function openSettingsModal(engine) {
     link.download = `k0-canvas-${Date.now()}.png`;
     link.href = engine.canvas.toDataURL('image/png');
     link.click();
+  });
+}
+
+// ────────────────────────────────────────────────────────
+// Confirm Delete Modal
+// ────────────────────────────────────────────────────────
+
+export function openConfirmDeleteModal(onConfirm) {
+  const contentHTML = `
+    <div class="confirm-delete">
+      <div class="confirm-delete__icon">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#FF6B6B" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+          <line x1="12" y1="9" x2="12" y2="13"/>
+          <line x1="12" y1="17" x2="12.01" y2="17"/>
+        </svg>
+      </div>
+      <p class="confirm-delete__text">delete all your drawings?<br><span class="confirm-delete__subtext">this can't be undone.</span></p>
+      <div class="confirm-delete__actions">
+        <button class="modal__btn modal__btn--danger-fill" id="confirm-delete-yes">delete.</button>
+        <button class="modal__btn modal__btn--secondary" id="confirm-delete-no">cancel.</button>
+      </div>
+    </div>
+  `;
+
+  const modal = createModal('confirm-delete-modal', '', contentHTML);
+
+  // Hide the header for this mini modal
+  const header = modal.querySelector('.modal__header');
+  if (header) header.style.display = 'none';
+
+  modal.querySelector('#confirm-delete-yes').addEventListener('click', () => {
+    closeModal('confirm-delete-modal');
+    if (onConfirm) onConfirm();
+  });
+
+  modal.querySelector('#confirm-delete-no').addEventListener('click', () => {
+    closeModal('confirm-delete-modal');
   });
 }

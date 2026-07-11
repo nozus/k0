@@ -39,7 +39,9 @@ export function createWigglePoint(x, y, pressure = 0.5) {
 }
 
 /**
- * SimpleAnimator — renders on demand + handles time-based tool effects
+ * SimpleAnimator — renders on demand only.
+ * No continuous rAF loop when idle. Schedules a frame only when
+ * requestRender() is called, then stops after rendering.
  */
 export class WiggleAnimator {
   constructor(renderCallback) {
@@ -47,14 +49,12 @@ export class WiggleAnimator {
     this.running = false;
     this.startTime = 0;
     this._frameId = null;
-    this._needsRender = true;
   }
 
   start() {
     if (this.running) return;
     this.running = true;
     this.startTime = performance.now() / 1000;
-    this._tick();
   }
 
   stop() {
@@ -67,19 +67,14 @@ export class WiggleAnimator {
 
   /** Request a re-render on the next frame */
   requestRender() {
-    this._needsRender = true;
-  }
-
-  _tick() {
     if (!this.running) return;
-    const time = performance.now() / 1000 - this.startTime;
-    
-    // Only render when needed (drawing, undo, tool change, etc.)
-    if (this._needsRender) {
+    // If we already have a pending frame, don't double-schedule
+    if (this._frameId) return;
+    this._frameId = requestAnimationFrame(() => {
+      this._frameId = null;
+      if (!this.running) return;
+      const time = performance.now() / 1000 - this.startTime;
       this.renderCallback(time);
-      this._needsRender = false;
-    }
-    
-    this._frameId = requestAnimationFrame(() => this._tick());
+    });
   }
 }
