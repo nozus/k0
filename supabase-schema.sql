@@ -135,10 +135,22 @@ CREATE POLICY "Users can update their own avatar"
 
 -- 6. BACKFILL ORPHANED USERS
 -- If you encountered a foreign key error on created_by, this rescues existing auth users.
+-- Uses a CTE with ROW_NUMBER to prevent duplicate username errors.
+WITH ranked_users AS (
+  SELECT 
+    id,
+    COALESCE(raw_user_meta_data->>'username', 'user_' || substr(id::text, 1, 8)) AS base_username,
+    COALESCE(raw_user_meta_data->>'display_name', 'User') AS display_name,
+    ROW_NUMBER() OVER (
+      PARTITION BY COALESCE(raw_user_meta_data->>'username', 'user_' || substr(id::text, 1, 8)) 
+      ORDER BY created_at ASC
+    ) as rn
+  FROM auth.users
+)
 INSERT INTO public.profiles (id, username, display_name)
 SELECT 
   id, 
-  COALESCE(raw_user_meta_data->>'username', 'user_' || substr(id::text, 1, 8)), 
-  COALESCE(raw_user_meta_data->>'display_name', 'User')
-FROM auth.users
+  CASE WHEN rn = 1 THEN base_username ELSE base_username || '_' || substr(id::text, 1, 4) END, 
+  display_name
+FROM ranked_users
 ON CONFLICT (id) DO NOTHING;

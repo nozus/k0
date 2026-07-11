@@ -39,6 +39,16 @@
   color: var(--text-dark);
   margin-bottom: 2rem;
   user-select: none;
+  animation: logoWiggle 4s ease-in-out infinite;
+  display: inline-block;
+  transform-origin: center;
+}
+
+@keyframes logoWiggle {
+  0%, 100% { transform: rotate(0deg) scale(1); }
+  25% { transform: rotate(-3deg) scale(1.02); }
+  50% { transform: rotate(2deg) scale(0.98); }
+  75% { transform: rotate(-1deg) scale(1.01); }
 }
 
 .auth-tagline {

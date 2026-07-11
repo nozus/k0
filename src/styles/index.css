@@ -8,13 +8,13 @@
 
 /* ── Design Tokens ─────────────────────────────────────────── */
 :root {
-  /* Colors — nozus-style minimal palette */
-  --bg:          #FFFFFF;
-  --bg-alt:      #FDFDFD;
-  --border:      #F3F4F6;
-  --text-dark:   #b3b3b3;
-  --text-muted:  #c4c4c4;
-  --text-black:  #1a1a1a;
+  /* Colors — wiggly paint dark palette */
+  --bg:          #1a1a2e;
+  --bg-alt:      #21213b;
+  --border:      rgba(255, 255, 255, 0.1);
+  --text-dark:   #ffffff;
+  --text-muted:  rgba(255, 255, 255, 0.5);
+  --text-black:  #FF6B6B;
 
   /* Sidebar */
   --sidebar-width: 250px;
